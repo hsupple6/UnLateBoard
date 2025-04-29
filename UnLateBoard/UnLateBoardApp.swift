@@ -1,17 +1,13 @@
-//
-//  UnLateBoardApp.swift
-//  UnLateBoard
-//
-//  Created by Hayden Supple on 4/26/25.
-//
-
 import SwiftUI
 
 @main
-struct UnLateBoardApp: App {
+struct YourApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView()  // Set the first view as the starting point
+                .preferredColorScheme(.dark) // Ensures the entire app uses dark mode
         }
     }
 }
+
+
