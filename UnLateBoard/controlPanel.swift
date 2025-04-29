@@ -63,6 +63,7 @@ struct ThickVerticalSlider: View {
 // Main control view
 struct ControlView: View {
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var connectionManager: ConnectionManager
     @State private var speedValue: Double = 25.0
     @State private var newVal: Double = 5
     @State private var navigate: Bool = false
@@ -75,6 +76,8 @@ struct ControlView: View {
 
     @State private var isSet5: Bool = false
     @State private var isSet6: Bool = false
+    
+    
 
     
     var body: some View {
@@ -128,6 +131,9 @@ struct ControlView: View {
                                 range: 0...50,
                                 fillColor: .green
                             )
+                            .onChange(of: speedValue) {
+                                connectionManager.send(message: "SV \(speedValue)")
+                            }
                             
                             VStack {
                                 Text("Max Speed")
@@ -151,7 +157,9 @@ struct ControlView: View {
                                 range: 1...10,
                                 fillColor: .blue
                             )
-                            
+                            .onChange(of: newVal) {
+                                connectionManager.send(message: "ACC \(newVal)")
+                            }
                             VStack {
                                 Text("Max Acc")
                                     .foregroundColor(.white)
@@ -174,6 +182,7 @@ struct ControlView: View {
                             
                             Button (action: {
                                 isSet1 = !isSet1
+                                connectionManager.send(message: "FL \(isSet1 ? "1" : "0")")
                             }) {
                                 
                                 ZStack {
@@ -260,6 +269,7 @@ struct ControlView: View {
                             
                             Button (action: {
                                 isSet2 = !isSet2
+                                connectionManager.send(message: "LK \(isSet2 ? "1" : "0")")
                             }) {
                                 
                                 ZStack {
@@ -521,7 +531,7 @@ struct LockAnim: View {
 
 struct ControlView_Previews: PreviewProvider {
     static var previews: some View {
-        ControlView()
+        ControlView(connectionManager: ConnectionManager(host: "127.0.0.1", port: 8080))
     }
 }
 
