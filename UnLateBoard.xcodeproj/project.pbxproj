@@ -6,6 +6,12 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		1DDB21CF7D9FDACD328DC497 /* Pods_UnLateBoard_UnLateBoardUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0941E6EFA2FC73F0C1669628 /* Pods_UnLateBoard_UnLateBoardUITests.framework */; };
+		6D9729B2B2A05653614781E1 /* Pods_UnLateBoard.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2D0317A7B4448B59E6D11A3 /* Pods_UnLateBoard.framework */; };
+		842073F0A81E584B80EAA6D3 /* Pods_UnLateBoardTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 14E7EA622220D4F689161878 /* Pods_UnLateBoardTests.framework */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		58584E842DBD9605003F68CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -24,19 +30,61 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		0941E6EFA2FC73F0C1669628 /* Pods_UnLateBoard_UnLateBoardUITests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UnLateBoard_UnLateBoardUITests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		14E7EA622220D4F689161878 /* Pods_UnLateBoardTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UnLateBoardTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		2813A6CFB582B68352C1EF05 /* Pods-UnLateBoard-UnLateBoardUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoard-UnLateBoardUITests.release.xcconfig"; path = "Target Support Files/Pods-UnLateBoard-UnLateBoardUITests/Pods-UnLateBoard-UnLateBoardUITests.release.xcconfig"; sourceTree = "<group>"; };
+		4B2514770D3AC9DBE0C60971 /* Pods-UnLateBoard.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoard.debug.xcconfig"; path = "Target Support Files/Pods-UnLateBoard/Pods-UnLateBoard.debug.xcconfig"; sourceTree = "<group>"; };
+		58076C0A2DFEA94000FF7D24 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		5833133D2DFE987400DB415F /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		583C8E1B2E2394E5001C5837 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		583D65762DFEA70100308E0F /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		5854A76E2DFEA48500FB6BE3 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		5854A79E2DFEA4B500FB6BE3 /* UnLateBoard.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = UnLateBoard.xcodeproj; sourceTree = "<group>"; };
 		58584E762DBD9603003F68CC /* UnLateBoard.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = UnLateBoard.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		58584E832DBD9605003F68CC /* UnLateBoardTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnLateBoardTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		58584E8D2DBD9605003F68CC /* UnLateBoardUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = UnLateBoardUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		5882A87C2DFFA0AE0012D5A2 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		5882A8DD2E08157E0012D5A2 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		589C03572E23801D00266710 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		589C04142E23930D00266710 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		589C04762E2393D600266710 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		58D640792E1A099A00241AB2 /* GoogleMapsSwiftUI.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = GoogleMapsSwiftUI.xcodeproj; sourceTree = "<group>"; };
+		601EF26B040E89CB5EA64A5E /* Pods-UnLateBoardTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoardTests.release.xcconfig"; path = "Target Support Files/Pods-UnLateBoardTests/Pods-UnLateBoardTests.release.xcconfig"; sourceTree = "<group>"; };
+		A3B389DB7895EAEE040DD1C9 /* Pods-UnLateBoardTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoardTests.debug.xcconfig"; path = "Target Support Files/Pods-UnLateBoardTests/Pods-UnLateBoardTests.debug.xcconfig"; sourceTree = "<group>"; };
+		A9097900ED0E228BC3724530 /* Pods-UnLateBoard-UnLateBoardUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoard-UnLateBoardUITests.debug.xcconfig"; path = "Target Support Files/Pods-UnLateBoard-UnLateBoardUITests/Pods-UnLateBoard-UnLateBoardUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		CB4A04A50C9A3878C76FBA40 /* Pods-UnLateBoard.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-UnLateBoard.release.xcconfig"; path = "Target Support Files/Pods-UnLateBoard/Pods-UnLateBoard.release.xcconfig"; sourceTree = "<group>"; };
+		E2D0317A7B4448B59E6D11A3 /* Pods_UnLateBoard.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_UnLateBoard.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedRootGroup section */
-		581904752DBDA61D004C21D2 /* ML */ = {
-			isa = PBXFileSystemSynchronizedRootGroup;
-			path = ML;
-			sourceTree = "<group>";
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		58FF16322DD88EDC007F6F0F /* Exceptions for "UnLateBoard" folder in "UnLateBoard" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				"/Localized: GoogleMapsSwiftUI/GoogleMapsSwiftUI/LaunchScreen.storyboard",
+				GoogleMapsSwiftUI/Cartfile,
+				GoogleMapsSwiftUI/Cartfile.resolved,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/AppDelegate.swift,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/Assets.xcassets,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/City.swift,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/GoogleMaps.bundle,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/Info.plist,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/MapView.swift,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/MapViewController.swift,
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/MapViewControllerBridge.swift,
+				"GoogleMapsSwiftUI/GoogleMapsSwiftUI/Preview Content/Preview Assets.xcassets",
+				GoogleMapsSwiftUI/GoogleMapsSwiftUI/SceneDelegate.swift,
+				Info.plist,
+			);
+			target = 58584E752DBD9603003F68CC /* UnLateBoard */;
 		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
 		58584E782DBD9603003F68CC /* UnLateBoard */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				58FF16322DD88EDC007F6F0F /* Exceptions for "UnLateBoard" folder in "UnLateBoard" target */,
+			);
 			path = UnLateBoard;
 			sourceTree = "<group>";
 		};
@@ -57,6 +105,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				6D9729B2B2A05653614781E1 /* Pods_UnLateBoard.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -64,6 +113,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				842073F0A81E584B80EAA6D3 /* Pods_UnLateBoardTests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -71,20 +121,65 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1DDB21CF7D9FDACD328DC497 /* Pods_UnLateBoard_UnLateBoardUITests.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		58076C172DFEA94000FF7D24 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5833133F2DFE987400DB415F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		583C8E322E2394E5001C5837 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		583D65832DFEA70100308E0F /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5854A77B2DFEA48500FB6BE3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5854A79F2DFEA4B500FB6BE3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
 		58584E6D2DBD9603003F68CC = {
 			isa = PBXGroup;
 			children = (
-				581904752DBDA61D004C21D2 /* ML */,
+				5854A79E2DFEA4B500FB6BE3 /* UnLateBoard.xcodeproj */,
 				58584E782DBD9603003F68CC /* UnLateBoard */,
 				58584E862DBD9605003F68CC /* UnLateBoardTests */,
 				58584E902DBD9605003F68CC /* UnLateBoardUITests */,
 				58584E772DBD9603003F68CC /* Products */,
+				B098CBF33FCAEE23BEBCA661 /* Pods */,
+				D0C2DAD48B596D9B914F04BE /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -98,6 +193,71 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		5882A8892DFFA0AE0012D5A2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		5882A8F12E08157E0012D5A2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		589C036C2E23801D00266710 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		589C042D2E23930D00266710 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		589C048E2E2393D600266710 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		58D6408F2E1A099A00241AB2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B098CBF33FCAEE23BEBCA661 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				4B2514770D3AC9DBE0C60971 /* Pods-UnLateBoard.debug.xcconfig */,
+				CB4A04A50C9A3878C76FBA40 /* Pods-UnLateBoard.release.xcconfig */,
+				A9097900ED0E228BC3724530 /* Pods-UnLateBoard-UnLateBoardUITests.debug.xcconfig */,
+				2813A6CFB582B68352C1EF05 /* Pods-UnLateBoard-UnLateBoardUITests.release.xcconfig */,
+				A3B389DB7895EAEE040DD1C9 /* Pods-UnLateBoardTests.debug.xcconfig */,
+				601EF26B040E89CB5EA64A5E /* Pods-UnLateBoardTests.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
+		D0C2DAD48B596D9B914F04BE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				E2D0317A7B4448B59E6D11A3 /* Pods_UnLateBoard.framework */,
+				0941E6EFA2FC73F0C1669628 /* Pods_UnLateBoard_UnLateBoardUITests.framework */,
+				14E7EA622220D4F689161878 /* Pods_UnLateBoardTests.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -105,21 +265,20 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58584E972DBD9605003F68CC /* Build configuration list for PBXNativeTarget "UnLateBoard" */;
 			buildPhases = (
+				716FB6D6919E6F00926F84CF /* [CP] Check Pods Manifest.lock */,
 				58584E722DBD9603003F68CC /* Sources */,
 				58584E732DBD9603003F68CC /* Frameworks */,
 				58584E742DBD9603003F68CC /* Resources */,
+				FC7F26822C7BCFB8A45AA2CB /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				581904752DBDA61D004C21D2 /* ML */,
 				58584E782DBD9603003F68CC /* UnLateBoard */,
 			);
 			name = UnLateBoard;
-			packageProductDependencies = (
-			);
 			productName = UnLateBoard;
 			productReference = 58584E762DBD9603003F68CC /* UnLateBoard.app */;
 			productType = "com.apple.product-type.application";
@@ -128,6 +287,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58584E9A2DBD9605003F68CC /* Build configuration list for PBXNativeTarget "UnLateBoardTests" */;
 			buildPhases = (
+				A4D3970EEEBAA687B58FC304 /* [CP] Check Pods Manifest.lock */,
 				58584E7F2DBD9605003F68CC /* Sources */,
 				58584E802DBD9605003F68CC /* Frameworks */,
 				58584E812DBD9605003F68CC /* Resources */,
@@ -141,8 +301,6 @@
 				58584E862DBD9605003F68CC /* UnLateBoardTests */,
 			);
 			name = UnLateBoardTests;
-			packageProductDependencies = (
-			);
 			productName = UnLateBoardTests;
 			productReference = 58584E832DBD9605003F68CC /* UnLateBoardTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -151,9 +309,11 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 58584E9D2DBD9605003F68CC /* Build configuration list for PBXNativeTarget "UnLateBoardUITests" */;
 			buildPhases = (
+				13AB1C528EA3725C86B5B619 /* [CP] Check Pods Manifest.lock */,
 				58584E892DBD9605003F68CC /* Sources */,
 				58584E8A2DBD9605003F68CC /* Frameworks */,
 				58584E8B2DBD9605003F68CC /* Resources */,
+				B0736C47AE0493001C4D3056 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -164,8 +324,6 @@
 				58584E902DBD9605003F68CC /* UnLateBoardUITests */,
 			);
 			name = UnLateBoardUITests;
-			packageProductDependencies = (
-			);
 			productName = UnLateBoardUITests;
 			productReference = 58584E8D2DBD9605003F68CC /* UnLateBoardUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -205,6 +363,56 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 58584E772DBD9603003F68CC /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 5854A77B2DFEA48500FB6BE3 /* Products */;
+					ProjectRef = 5854A76E2DFEA48500FB6BE3 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 58076C172DFEA94000FF7D24 /* Products */;
+					ProjectRef = 58076C0A2DFEA94000FF7D24 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 589C048E2E2393D600266710 /* Products */;
+					ProjectRef = 589C04762E2393D600266710 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 583D65832DFEA70100308E0F /* Products */;
+					ProjectRef = 583D65762DFEA70100308E0F /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 5833133F2DFE987400DB415F /* Products */;
+					ProjectRef = 5833133D2DFE987400DB415F /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 5882A8892DFFA0AE0012D5A2 /* Products */;
+					ProjectRef = 5882A87C2DFFA0AE0012D5A2 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 5882A8F12E08157E0012D5A2 /* Products */;
+					ProjectRef = 5882A8DD2E08157E0012D5A2 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 58D6408F2E1A099A00241AB2 /* Products */;
+					ProjectRef = 58D640792E1A099A00241AB2 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 589C036C2E23801D00266710 /* Products */;
+					ProjectRef = 589C03572E23801D00266710 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 589C042D2E23930D00266710 /* Products */;
+					ProjectRef = 589C04142E23930D00266710 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 583C8E322E2394E5001C5837 /* Products */;
+					ProjectRef = 583C8E1B2E2394E5001C5837 /* GoogleMapsSwiftUI.xcodeproj */;
+				},
+				{
+					ProductGroup = 5854A79F2DFEA4B500FB6BE3 /* Products */;
+					ProjectRef = 5854A79E2DFEA4B500FB6BE3 /* UnLateBoard.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				58584E752DBD9603003F68CC /* UnLateBoard */,
@@ -237,6 +445,117 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		13AB1C528EA3725C86B5B619 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UnLateBoard-UnLateBoardUITests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		716FB6D6919E6F00926F84CF /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UnLateBoard-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A4D3970EEEBAA687B58FC304 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-UnLateBoardTests-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+		B0736C47AE0493001C4D3056 /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard-UnLateBoardUITests/Pods-UnLateBoard-UnLateBoardUITests-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard-UnLateBoardUITests/Pods-UnLateBoard-UnLateBoardUITests-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard-UnLateBoardUITests/Pods-UnLateBoard-UnLateBoardUITests-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		FC7F26822C7BCFB8A45AA2CB /* [CP] Copy Pods Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard/Pods-UnLateBoard-resources-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "[CP] Copy Pods Resources";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard/Pods-UnLateBoard-resources-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-UnLateBoard/Pods-UnLateBoard-resources.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		58584E722DBD9603003F68CC /* Sources */ = {
@@ -313,7 +632,7 @@
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -376,7 +695,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu17;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -397,13 +716,19 @@
 		};
 		58584E982DBD9605003F68CC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4B2514770D3AC9DBE0C60971 /* Pods-UnLateBoard.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HMHL9NH33Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UnLateBoard/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Product uses bluetooth communication for skateboard";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This product uses Camera use for image classiification";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location for maps";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -424,13 +749,19 @@
 		};
 		58584E992DBD9605003F68CC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = CB4A04A50C9A3878C76FBA40 /* Pods-UnLateBoard.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = HMHL9NH33Y;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = UnLateBoard/Info.plist;
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "Product uses bluetooth communication for skateboard";
+				INFOPLIST_KEY_NSCameraUsageDescription = "This product uses Camera use for image classiification";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "App needs location for maps";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -441,6 +772,7 @@
 					"@executable_path/Frameworks",
 				);
 				MARKETING_VERSION = 1.0;
+				"PODS_XCFRAMEWORKS_BUILD_DIR[arch=*]" = "$(PODS_CONFIGURATION_BUILD_DIR)/XCFrameworkIntermediates";
 				PRODUCT_BUNDLE_IDENTIFIER = UnlateBoard.UnLateBoard;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -451,6 +783,7 @@
 		};
 		58584E9B2DBD9605003F68CC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A3B389DB7895EAEE040DD1C9 /* Pods-UnLateBoardTests.debug.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -469,6 +802,7 @@
 		};
 		58584E9C2DBD9605003F68CC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 601EF26B040E89CB5EA64A5E /* Pods-UnLateBoardTests.release.xcconfig */;
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
@@ -487,6 +821,7 @@
 		};
 		58584E9E2DBD9605003F68CC /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = A9097900ED0E228BC3724530 /* Pods-UnLateBoard-UnLateBoardUITests.debug.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -503,6 +838,7 @@
 		};
 		58584E9F2DBD9605003F68CC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2813A6CFB582B68352C1EF05 /* Pods-UnLateBoard-UnLateBoardUITests.release.xcconfig */;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
