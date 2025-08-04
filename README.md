@@ -185,4 +185,4 @@ For support, email support@unlateboard.com or create an issue in the repository.
 
 ---
 
-**Note**: This app is designed for educational and development purposes. Always follow local laws and safety regulations when using electric skateboards. 
+**Note**: This app is designed for educational and development purposes. Always follow local laws and safety regulations when using electric skateboards. # UnLateBoard
