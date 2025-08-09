@@ -551,7 +551,13 @@
             document.getElementById('motor1Slider').value = motor1Speed;
             
             if (isConnected) {
-                sendCommand(`MOTOR1 ${motor1Speed}`);
+                // Convert individual motor control to joystick-style command
+                // Motor1 = Left, Motor2 = Right
+                // Calculate steering and throttle from individual motors
+                const avgThrottle = Math.round((motor1Speed + motor2Speed) / 2);
+                const steering = Math.round((motor2Speed - motor1Speed) * 2); // Amplify steering difference
+                sendCommand(`X ${steering} Y ${avgThrottle}`);
+                addLog(`Motor1=${motor1Speed}% → Steering=${steering}, Throttle=${avgThrottle}`, 'info');
             }
         }
 
@@ -561,7 +567,13 @@
             document.getElementById('motor2Slider').value = motor2Speed;
             
             if (isConnected) {
-                sendCommand(`MOTOR2 ${motor2Speed}`);
+                // Convert individual motor control to joystick-style command
+                // Motor1 = Left, Motor2 = Right
+                // Calculate steering and throttle from individual motors
+                const avgThrottle = Math.round((motor1Speed + motor2Speed) / 2);
+                const steering = Math.round((motor2Speed - motor1Speed) * 2); // Amplify steering difference
+                sendCommand(`X ${steering} Y ${avgThrottle}`);
+                addLog(`Motor2=${motor2Speed}% → Steering=${steering}, Throttle=${avgThrottle}`, 'info');
             }
         }
 
@@ -584,8 +596,8 @@
         function emergencyStop() {
             updateMotor1(0);
             updateMotor2(0);
-            sendCommand('EMERGENCY_STOP');
-            addLog('EMERGENCY STOP ACTIVATED', 'error');
+            sendCommand('X 0 Y 0'); // Send stop command in correct format
+            addLog('EMERGENCY STOP ACTIVATED - All motors stopped', 'error');
         }
 
         // Communication functions - Real commands via bridge server

@@ -1,188 +1,150 @@
-# UnLateBoard - Smart Electric Skateboard App
+# ESP32-CAM Motor Control Web Interface
 
-A comprehensive iOS app for controlling and monitoring a smart electric skateboard with ML-powered object detection.
+A complete solution for controlling ESP32-CAM motors through a web browser using a Node.js bridge server.
 
-## 🚀 Features
+## 🚀 Quick Start
 
-- **Real-time Motor Control**: Precise speed and acceleration control
-- **ML Object Detection**: YOLOv5-based real-time object detection
-- **Connection Management**: Robust TCP connection with auto-reconnect
-- **Trip Tracking**: Distance, time, and performance metrics
-- **Safety Features**: Emergency stop, brake control, and speed limits
-- **Modern UI**: Dark theme with smooth animations
+### Prerequisites
+- Node.js installed on your computer
+- ESP32-CAM running the motor control firmware
+- Connected to ESP32-CAM WiFi network
 
-## 🏗️ Architecture
+### Setup
 
-The app has been completely restructured with a clean, modular architecture:
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
 
-### Core Components
+2. **Start the Bridge Server**
+   ```bash
+   npm start
+   ```
+   
+   You should see:
+   ```
+   🚀 ESP32-CAM Bridge Server started on port 8080
+   📡 Will connect to ESP32-CAM at 192.168.4.1:3333
+   ✅ Connected to ESP32-CAM successfully!
+   ```
 
-- **AppStateManager**: Central app state and navigation management
-- **ConnectionManager**: Robust TCP connection handling with heartbeat and reconnection
-- **MotorManagement**: Motor control and trip statistics
-- **MLProcessor**: YOLOv5 object detection with real-time streaming
-- **AppConfig**: Centralized configuration management
+3. **Open the Web Interface**
+   - Open `ESP32_Motor_Control.html` in your web browser
+   - Click "Connect to Bridge"
+   - Start controlling your motors!
 
-### Key Improvements
+## 🎮 Features
 
-1. **Eliminated Crashes**: Fixed race conditions, memory leaks, and thread safety issues
-2. **Better Error Handling**: Comprehensive error handling with user-friendly messages
-3. **Centralized Configuration**: All hardcoded values moved to AppConfig
-4. **Proper Logging**: Structured logging with different levels
-5. **Clean Architecture**: Separation of concerns and dependency injection
-6. **Thread Safety**: Proper use of DispatchQueue and locks
+### Motor Controls
+- **Individual Motor Control**: Separate sliders for left and right motors
+- **Combined Control**: Virtual joystick for steering + throttle
+- **Quick Actions**: Forward, reverse, left, right buttons
+- **Emergency Stop**: Immediate stop all motors
 
-## 📱 Screens
+### Real-time Features
+- **Live Status**: See actual ESP32-CAM responses
+- **Command Logging**: Track all sent commands and responses
+- **Connection Status**: Monitor bridge and ESP32 connectivity
+- **Automatic Reconnection**: Bridge server reconnects to ESP32-CAM automatically
 
-- **Intro**: Welcome screen with app branding
-- **Login/Signup**: User authentication
-- **Main**: Dashboard with navigation to different features
-- **Control Panel**: Motor control interface
-- **ML Vision**: Real-time object detection
-- **Settings**: App configuration
+### Keyboard Controls
+- **Arrow Keys**: Directional control
+- **Spacebar**: Emergency stop
 
-## 🔧 Configuration
+## 🔧 How It Works
 
-All configuration is centralized in `AppConfig.swift`:
-
-```swift
-// Network settings
-AppConfig.Network.defaultHost = "192.168.4.1"
-AppConfig.Network.defaultPort = 3333
-
-// ML settings
-AppConfig.ML.confidenceThreshold = 0.3
-AppConfig.ML.modelInputSize = CGSize(width: 416, height: 416)
-
-// Motor settings
-AppConfig.Motor.defaultMaxSpeed = 25.0 // m/s
-AppConfig.Motor.defaultMaxAcceleration = 10.0 // m/s²
+```
+Web Browser → Bridge Server → ESP32-CAM → Arduino (Motors)
+     ↑              ↑              ↑           ↑
+  WebSocket      TCP Socket    UART Serial   PWM Signals
 ```
 
-## 🚨 Safety Features
+1. **Web Browser** sends commands via WebSocket to bridge server
+2. **Bridge Server** forwards commands via TCP to ESP32-CAM  
+3. **ESP32-CAM** relays commands via UART to Arduino
+4. **Arduino** controls motors via PWM signals
 
-- **Emergency Stop**: Immediate halt with increased braking force
-- **Speed Limits**: Configurable maximum speed with warnings
-- **Brake Control**: Adjustable braking intensity
-- **Connection Monitoring**: Automatic reconnection on connection loss
+## 📡 Commands Supported
 
-## 📊 Performance Tracking
+- `X -50 Y 25` - Joystick control (steering + throttle)
+- `SPEED 5` - Set speed limit (0-30)
+- `STATUS` - Get system status
+- `PING` - Heartbeat/connectivity test
+- `EMERGENCY_STOP` - Stop all motors immediately
 
-- **Trip Statistics**: Distance, time, average speed
-- **Real-time Metrics**: Current speed, acceleration, heading
-- **Connection Quality**: Network performance monitoring
-- **ML Performance**: FPS and detection accuracy
+## 🛠️ Configuration
 
-## 🔌 Connection Protocol
-
-The app communicates with the ESP32 using a custom TCP protocol:
-
-### Commands
-- `MOTOR:speed=<value>`: Set motor speed
-- `MOTOR:direction=<value>`: Set direction
-- `MOTOR:maxVelo=<value>`: Set maximum velocity
-- `MOTOR:maxAccel=<value>`: Set maximum acceleration
-- `STATUS`: Request device status
-- `PING`: Heartbeat ping
-
-### Responses
-- `STATUS:<status>`: Device status response
-- `MOTOR:<data>`: Motor data updates
-- `ERROR:<message>`: Error messages
-- `PONG`: Heartbeat response
-
-## 🧠 ML Integration
-
-The app uses YOLOv5 for real-time object detection:
-
-- **Model**: yolov5l.mlmodel (45MB)
-- **Input Size**: 416x416 pixels
-- **Confidence Threshold**: 30%
-- **Frame Rate**: Up to 60 FPS
-- **Detection Types**: 80 COCO classes
-
-## 🛠️ Development
-
-### Requirements
-- iOS 15.0+
-- Xcode 14.0+
-- Swift 5.7+
-
-### Dependencies
-- GoogleMaps (via CocoaPods)
-- Vision framework (built-in)
-- CoreML framework (built-in)
-
-### Building
-1. Clone the repository
-2. Run `pod install` to install dependencies
-3. Open `UnLateBoard.xcworkspace`
-4. Build and run
-
-## 🐛 Bug Fixes
-
-### Major Issues Resolved
-
-1. **ML Crashes**: Fixed race conditions in frame processing
-2. **Connection Drops**: Implemented robust reconnection logic
-3. **Memory Leaks**: Proper cleanup in deinit methods
-4. **Thread Safety**: Used proper dispatch queues and locks
-5. **State Management**: Centralized app state management
-6. **Error Handling**: Comprehensive error handling throughout
-
-### Performance Improvements
-
-1. **Frame Processing**: Optimized ML pipeline
-2. **Connection**: Reduced latency with keepalive
-3. **UI**: Smooth animations and transitions
-4. **Memory**: Reduced memory footprint
-
-## 📝 Logging
-
-The app includes comprehensive logging:
-
-```swift
-Logger.shared.debug("Debug message")
-Logger.shared.info("Info message")
-Logger.shared.warning("Warning message")
-Logger.shared.error("Error message")
-Logger.shared.fatal("Fatal error")
+### Bridge Server Settings
+Edit `ESP32_Bridge_Server.js`:
+```javascript
+const ESP32_HOST = '192.168.4.1';  // ESP32-CAM IP
+const ESP32_PORT = 3333;           // ESP32-CAM TCP port
+const BRIDGE_PORT = 8080;          // Bridge server port
 ```
 
-Log levels are configurable per environment (development/production).
+### Web App Settings
+Default bridge address: `localhost:8080`
+(Can be changed in the web interface)
 
-## 🔒 Security
+## 📊 Monitoring
 
-- API keys stored in configuration
-- User authentication with UserDefaults
-- Secure TCP connections
-- Input validation throughout
+### Bridge Server Logs
+```bash
+[2024-01-15T10:30:45.123Z] [INFO] ✅ Connected to ESP32-CAM successfully!
+[2024-01-15T10:30:50.456Z] [INFO] 🌐 Web client connected
+[2024-01-15T10:30:55.789Z] [INFO] 📤 Sent to ESP32: X 0 Y 25
+[2024-01-15T10:30:56.012Z] [INFO] 📥 ESP32: Status: driving, Streaming: ON...
+```
 
-## 📈 Future Enhancements
+### ESP32-CAM Serial Monitor
+You should see:
+```
+WiFi client connected! Start sending frames.
+[123456ms] [SERIAL] Received: 'X 0 Y 25'
+[123456ms] [JOYSTICK] Raw X=0.00, Y=25.00 -> Throttle=10.00%, Steering=0.00°
+```
 
-- [ ] Bluetooth connectivity
-- [ ] GPS navigation
-- [ ] Cloud data sync
-- [ ] Advanced ML models
-- [ ] Social features
-- [ ] Performance analytics
+## 🚨 Troubleshooting
 
-## 🤝 Contributing
+### Bridge Server Won't Connect to ESP32-CAM
+- Check ESP32-CAM is powered and running
+- Verify you're connected to ESP32-CAM WiFi network
+- Check IP address (default: 192.168.4.1)
+- Look for "TCP Server started" in ESP32-CAM serial output
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
-5. Submit a pull request
+### Web App Won't Connect to Bridge
+- Make sure bridge server is running (`npm start`)
+- Check bridge address (default: localhost:8080)
+- Try refreshing the web page
+- Check browser console for errors
 
-## 📄 License
+### Commands Not Working
+- Verify ESP32-CAM shows "UART: ..." responses
+- Check Arduino serial monitor for command reception
+- Test with direct iOS app connection first
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+## 📁 Files
 
-## 🆘 Support
+- `ESP32_Bridge_Server.js` - Node.js bridge server
+- `ESP32_Motor_Control.html` - Web interface
+- `package.json` - Node.js dependencies
+- `README.md` - This file
 
-For support, email support@unlateboard.com or create an issue in the repository.
+## 🔒 Security Note
+
+This setup is intended for local development and testing. For production use:
+- Add authentication to the bridge server
+- Use HTTPS/WSS connections
+- Implement rate limiting
+- Add input validation
+
+## 📱 Alternative Control Methods
+
+- **UnLateBoard iOS App** - Native TCP connection
+- **Desktop Applications** - Direct TCP socket access
+- **Serial Terminal** - Direct Arduino UART connection
+- **Custom Scripts** - Python/Node.js with socket libraries
 
 ---
 
-**Note**: This app is designed for educational and development purposes. Always follow local laws and safety regulations when using electric skateboards. # UnLateBoard
+**Happy motor controlling!** 🚗💨
