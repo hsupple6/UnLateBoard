@@ -258,17 +258,18 @@
                 <span id="connectionStatus">Disconnected</span>
             </div>
             
-            <!-- Browser Limitation Notice -->
-            <div style="background: rgba(255, 165, 0, 0.2); border: 1px solid #ffaa00; border-radius: 10px; padding: 15px; margin: 20px 0; color: #ffaa00;">
-                <h4>⚠️ Browser Limitation Notice</h4>
-                <p>Web browsers cannot make direct TCP connections to your ESP32-CAM.</p>
-                <p><strong>For actual motor control, use:</strong></p>
-                <ul style="margin: 10px 0; padding-left: 20px;">
-                    <li>📱 <strong>UnLateBoard iOS App</strong> (recommended)</li>
-                    <li>🖥️ Desktop application with TCP support</li>
-                    <li>📡 Direct serial connection to Arduino</li>
-                </ul>
-                <p><em>This web interface shows simulated commands for testing purposes.</em></p>
+            <!-- Bridge Server Solution -->
+            <div style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; border-radius: 10px; padding: 15px; margin: 20px 0; color: #00ff88;">
+                <h4>🌉 Bridge Server Solution</h4>
+                <p>This web app connects to a Node.js bridge server that communicates with your ESP32-CAM.</p>
+                <p><strong>Setup Instructions:</strong></p>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                    <li>📥 Install Node.js on your computer</li>
+                    <li>⚡ Run: <code>npm install</code> (in the same folder as these files)</li>
+                    <li>🚀 Run: <code>npm start</code> (starts the bridge server)</li>
+                    <li>🌐 Connect this web app to localhost:8080</li>
+                </ol>
+                <p><em>The bridge server will connect to your ESP32-CAM and relay commands!</em></p>
             </div>
         </div>
 
@@ -276,11 +277,13 @@
         <div class="connection-panel">
             <h3>🔗 Connection Settings</h3>
             <div class="input-group">
-                <input type="text" id="ipAddress" placeholder="ESP32 IP Address" value="192.168.4.1">
-                <input type="text" id="port" placeholder="Port" value="3333">
-                <button class="btn btn-primary" onclick="connect()">Connect</button>
+                <input type="text" id="bridgeAddress" placeholder="Bridge Server Address" value="localhost:8080">
+                <button class="btn btn-primary" onclick="connect()">Connect to Bridge</button>
                 <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
             </div>
+            <p style="color: #ffaa00; font-size: 0.9rem; margin-top: 10px;">
+                ℹ️ Make sure to run the Node.js bridge server first: <code>npm start</code>
+            </p>
         </div>
 
         <!-- Motor Controls -->
@@ -453,27 +456,70 @@
             }
         }
 
-        // Connection functions using raw TCP socket simulation
+        // Connection functions using WebSocket bridge
         function connect() {
-            const ip = document.getElementById('ipAddress').value;
-            const port = document.getElementById('port').value;
+            const bridgeAddress = document.getElementById('bridgeAddress').value;
             
-            if (!ip || !port) {
-                addLog('Please enter IP address and port', 'error');
+            if (!bridgeAddress) {
+                addLog('Please enter bridge server address', 'error');
                 return;
             }
 
-            addLog(`Connecting to TCP ${ip}:${port}...`, 'info');
-            addLog('Note: Using simulated TCP connection for motor control', 'warning');
+            addLog(`Connecting to bridge server at ${bridgeAddress}...`, 'info');
             
-            // Since browsers can't make raw TCP connections, we'll simulate it
-            // Commands will be queued and sent when possible
-            isConnected = true;
-            updateConnectionStatus(true);
-            addLog('Connected! (Simulated - commands will be sent via alternative method)', 'info');
-            
-            // Test connection with a ping
-            sendHeartbeat();
+            try {
+                const wsUrl = `ws://${bridgeAddress}`;
+                socket = new WebSocket(wsUrl);
+                
+                socket.onopen = function() {
+                    isConnected = true;
+                    updateConnectionStatus(true);
+                    addLog('✅ Connected to bridge server!', 'info');
+                    sendHeartbeat();
+                };
+
+                socket.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        handleBridgeMessage(data);
+                    } catch (error) {
+                        addLog(`📥 Raw message: ${event.data}`, 'info');
+                    }
+                };
+
+                socket.onclose = function() {
+                    isConnected = false;
+                    updateConnectionStatus(false);
+                    addLog('❌ Bridge connection closed', 'warning');
+                };
+
+                socket.onerror = function(error) {
+                    addLog(`❌ Bridge connection error: ${error}`, 'error');
+                    addLog('💡 Make sure Node.js bridge server is running', 'warning');
+                };
+
+            } catch (error) {
+                addLog(`❌ Failed to connect: ${error}`, 'error');
+            }
+        }
+        
+        function handleBridgeMessage(data) {
+            switch (data.type) {
+                case 'ESP32_STATUS':
+                    addLog(`📡 ESP32 Status: ${data.data}`, 'info');
+                    break;
+                case 'ESP32_RESPONSE':
+                    addLog(`📥 ESP32 Response: ${data.data}`, 'info');
+                    break;
+                case 'COMMAND_SENT':
+                    addLog(`✅ Command sent: ${data.data}`, 'info');
+                    break;
+                case 'COMMAND_FAILED':
+                    addLog(`❌ Command failed: ${data.data}`, 'error');
+                    break;
+                default:
+                    addLog(`📩 Bridge: ${data.data}`, 'info');
+            }
         }
 
         function disconnect() {
@@ -542,49 +588,30 @@
             addLog('EMERGENCY STOP ACTIVATED', 'error');
         }
 
-        // Communication functions - Simulated TCP over browser limitations
+        // Communication functions - Real commands via bridge server
         function sendCommand(command) {
-            if (!isConnected) {
-                addLog('Not connected - cannot send command', 'error');
+            if (!isConnected || !socket) {
+                addLog('Not connected to bridge server', 'error');
                 return;
             }
 
-            // Log the command as if it was sent
-            addLog(`📤 Command: ${command}`, 'info');
-            
-            // Display a message explaining the limitation
-            if (command !== 'PING' && command !== 'STATUS') {
-                addLog(`⚠️ Browser limitation: Cannot send raw TCP commands`, 'warning');
-                addLog(`💡 Use iOS app or desktop app for actual motor control`, 'warning');
-                addLog(`🔧 Command would be: "${command}"`, 'info');
+            if (socket.readyState !== WebSocket.OPEN) {
+                addLog('Bridge connection not ready', 'error');
+                return;
             }
-            
-            // For demonstration, show what the command would do
-            simulateCommandEffect(command);
-        }
-        
-        function simulateCommandEffect(command) {
-            if (command.startsWith('X ') && command.includes('Y ')) {
-                // Extract X and Y values
-                const xMatch = command.match(/X (-?\d+)/);
-                const yMatch = command.match(/Y (-?\d+)/);
+
+            try {
+                const message = JSON.stringify({
+                    type: 'COMMAND',
+                    command: command,
+                    timestamp: Date.now()
+                });
                 
-                if (xMatch && yMatch) {
-                    const x = parseInt(xMatch[1]);
-                    const y = parseInt(yMatch[1]);
-                    addLog(`🎮 Simulated: Steering=${x}%, Throttle=${y}%`, 'info');
-                }
-            } else if (command.startsWith('SPEED ')) {
-                const speed = command.split(' ')[1];
-                addLog(`🏃 Simulated: Speed limit set to ${speed}%`, 'info');
-            } else if (command === 'PING') {
-                setTimeout(() => {
-                    addLog(`📥 Simulated response: PONG`, 'info');
-                }, 100);
-            } else if (command === 'STATUS') {
-                setTimeout(() => {
-                    addLog(`📥 Simulated response: Status: idle, Motors: ready`, 'info');
-                }, 100);
+                socket.send(message);
+                addLog(`📤 Sending: ${command}`, 'info');
+                
+            } catch (error) {
+                addLog(`❌ Error sending command: ${error}`, 'error');
             }
         }
 

@@ -1,0 +1,26 @@
+{
+  "name": "esp32-cam-bridge",
+  "version": "1.0.0",
+  "description": "Bridge server for ESP32-CAM motor control via web interface",
+  "main": "ESP32_Bridge_Server.js",
+  "scripts": {
+    "start": "node ESP32_Bridge_Server.js",
+    "dev": "nodemon ESP32_Bridge_Server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2",
+    "cors": "^2.8.5"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "keywords": [
+    "esp32",
+    "motor-control",
+    "websocket",
+    "tcp-bridge"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+} 
