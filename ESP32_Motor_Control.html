@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ESP32-CAM Motor Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1e1e1e, #2d2d2d);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            color: #00ff88;
+            margin-bottom: 10px;
+        }
+
+        .connection-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff4444;
+            transition: background-color 0.3s;
+        }
+
+        .status-indicator.connected {
+            background-color: #00ff88;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .control-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .control-panel h3 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .motor-control {
+            margin-bottom: 20px;
+        }
+
+        .motor-label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .slider-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #444;
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+        }
+
+        .value-display {
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #00ff88;
+            margin-top: 10px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #00ff88;
+            color: #000;
+        }
+
+        .btn-primary:hover {
+            background: #00cc66;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background: #ff4444;
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            background: #cc3333;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #666;
+            color: #fff;
+        }
+
+        .btn-secondary:hover {
+            background: #555;
+            transform: translateY(-2px);
+        }
+
+        .connection-panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .input-group input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #555;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+
+        .log-panel {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .log-entry {
+            margin-bottom: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+
+        .log-entry.info { color: #00ff88; }
+        .log-entry.warning { color: #ffaa00; }
+        .log-entry.error { color: #ff4444; }
+
+        .joystick-area {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            background: radial-gradient(circle, #333, #111);
+            border-radius: 50%;
+            border: 2px solid #00ff88;
+        }
+
+        .joystick-knob {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: #00ff88;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
+            transition: all 0.1s ease-out;
+            box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .control-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚗 ESP32-CAM Motor Control</h1>
+            <div class="connection-status">
+                <div class="status-indicator" id="statusIndicator"></div>
+                <span id="connectionStatus">Disconnected</span>
+            </div>
+        </div>
+
+        <!-- Connection Panel -->
+        <div class="connection-panel">
+            <h3>🔗 Connection Settings</h3>
+            <div class="input-group">
+                <input type="text" id="ipAddress" placeholder="ESP32 IP Address" value="192.168.4.1">
+                <input type="text" id="port" placeholder="Port" value="3333">
+                <button class="btn btn-primary" onclick="connect()">Connect</button>
+                <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
+            </div>
+        </div>
+
+        <!-- Motor Controls -->
+        <div class="control-grid">
+            <!-- Individual Motor 1 -->
+            <div class="control-panel">
+                <h3>🔧 Motor 1 (Left)</h3>
+                <div class="motor-control">
+                    <label class="motor-label">Speed: <span id="motor1Value">0</span>%</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="motor1Slider" min="-100" max="100" value="0" 
+                               oninput="updateMotor1(this.value)">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="setMotor1(-50)">Rev</button>
+                    <button class="btn btn-danger" onclick="setMotor1(0)">Stop</button>
+                    <button class="btn btn-primary" onclick="setMotor1(50)">Fwd</button>
+                </div>
+            </div>
+
+            <!-- Individual Motor 2 -->
+            <div class="control-panel">
+                <h3>🔧 Motor 2 (Right)</h3>
+                <div class="motor-control">
+                    <label class="motor-label">Speed: <span id="motor2Value">0</span>%</label>
+                    <div class="slider-container">
+                        <input type="range" class="slider" id="motor2Slider" min="-100" max="100" value="0" 
+                               oninput="updateMotor2(this.value)">
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="setMotor2(-50)">Rev</button>
+                    <button class="btn btn-danger" onclick="setMotor2(0)">Stop</button>
+                    <button class="btn btn-primary" onclick="setMotor2(50)">Fwd</button>
+                </div>
+            </div>
+
+            <!-- Combined Controls -->
+            <div class="control-panel">
+                <h3>🎮 Combined Control</h3>
+                
+                <!-- Virtual Joystick -->
+                <div class="joystick-area" id="joystickArea">
+                    <div class="joystick-knob" id="joystickKnob"></div>
+                </div>
+                
+                <div class="value-display">
+                    X: <span id="joystickX">0</span> | Y: <span id="joystickY">0</span>
+                </div>
+                
+                <div class="button-group">
+                    <button class="btn btn-primary" onclick="sendCombined(0, 50)">Forward</button>
+                    <button class="btn btn-secondary" onclick="sendCombined(0, -50)">Reverse</button>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-secondary" onclick="sendCombined(-50, 0)">Left</button>
+                    <button class="btn btn-danger" onclick="emergencyStop()">STOP ALL</button>
+                    <button class="btn btn-secondary" onclick="sendCombined(50, 0)">Right</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status and Logs -->
+        <div class="control-panel">
+            <h3>📊 System Logs</h3>
+            <div class="log-panel" id="logPanel">
+                <div class="log-entry info">System ready. Connect to ESP32-CAM to begin.</div>
+            </div>
+            <div class="button-group" style="margin-top: 15px;">
+                <button class="btn btn-secondary" onclick="clearLogs()">Clear Logs</button>
+                <button class="btn btn-primary" onclick="sendStatus()">Get Status</button>
+                <button class="btn btn-primary" onclick="sendHeartbeat()">Ping</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Connection variables
+        let socket = null;
+        let isConnected = false;
+        let joystickActive = false;
+        let joystickCenter = { x: 0, y: 0 };
+
+        // Motor state
+        let motor1Speed = 0;
+        let motor2Speed = 0;
+
+        // Initialize joystick
+        function initJoystick() {
+            const joystickArea = document.getElementById('joystickArea');
+            const joystickKnob = document.getElementById('joystickKnob');
+            const rect = joystickArea.getBoundingClientRect();
+            
+            joystickCenter.x = rect.width / 2;
+            joystickCenter.y = rect.height / 2;
+
+            // Mouse events
+            joystickKnob.addEventListener('mousedown', startJoystick);
+            document.addEventListener('mousemove', moveJoystick);
+            document.addEventListener('mouseup', endJoystick);
+
+            // Touch events for mobile
+            joystickKnob.addEventListener('touchstart', startJoystick);
+            document.addEventListener('touchmove', moveJoystick);
+            document.addEventListener('touchend', endJoystick);
+        }
+
+        function startJoystick(e) {
+            e.preventDefault();
+            joystickActive = true;
+            document.getElementById('joystickKnob').style.transition = 'none';
+        }
+
+        function moveJoystick(e) {
+            if (!joystickActive) return;
+
+            const joystickArea = document.getElementById('joystickArea');
+            const joystickKnob = document.getElementById('joystickKnob');
+            const rect = joystickArea.getBoundingClientRect();
+
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            
+            const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            let deltaX = clientX - centerX;
+            let deltaY = clientY - centerY;
+
+            // Limit to circle
+            const maxRadius = rect.width / 2 - 30;
+            const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+            
+            if (distance > maxRadius) {
+                deltaX = (deltaX / distance) * maxRadius;
+                deltaY = (deltaY / distance) * maxRadius;
+            }
+
+            // Update knob position
+            joystickKnob.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+            // Convert to motor values (-100 to 100)
+            const x = Math.round((deltaX / maxRadius) * 100);
+            const y = Math.round((-deltaY / maxRadius) * 100); // Invert Y axis
+
+            document.getElementById('joystickX').textContent = x;
+            document.getElementById('joystickY').textContent = y;
+
+            // Send combined command
+            if (isConnected) {
+                sendCombined(x, y);
+            }
+        }
+
+        function endJoystick() {
+            if (!joystickActive) return;
+            
+            joystickActive = false;
+            const joystickKnob = document.getElementById('joystickKnob');
+            joystickKnob.style.transition = 'all 0.3s ease-out';
+            joystickKnob.style.transform = 'translate(0px, 0px)';
+            
+            document.getElementById('joystickX').textContent = '0';
+            document.getElementById('joystickY').textContent = '0';
+
+            // Return to center
+            if (isConnected) {
+                sendCombined(0, 0);
+            }
+        }
+
+        // Connection functions
+        function connect() {
+            const ip = document.getElementById('ipAddress').value;
+            const port = document.getElementById('port').value;
+            
+            if (!ip || !port) {
+                addLog('Please enter IP address and port', 'error');
+                return;
+            }
+
+            addLog(`Connecting to ${ip}:${port}...`, 'info');
+
+            try {
+                socket = new WebSocket(`ws://${ip}:${port}`);
+                
+                socket.onopen = function() {
+                    isConnected = true;
+                    updateConnectionStatus(true);
+                    addLog('Connected successfully!', 'info');
+                    sendHeartbeat();
+                };
+
+                socket.onmessage = function(event) {
+                    addLog(`Received: ${event.data}`, 'info');
+                };
+
+                socket.onclose = function() {
+                    isConnected = false;
+                    updateConnectionStatus(false);
+                    addLog('Connection closed', 'warning');
+                };
+
+                socket.onerror = function(error) {
+                    addLog(`Connection error: ${error}`, 'error');
+                    // Fallback to HTTP if WebSocket fails
+                    connectHTTP();
+                };
+
+            } catch (error) {
+                addLog(`Failed to create WebSocket: ${error}`, 'error');
+                connectHTTP();
+            }
+        }
+
+        function connectHTTP() {
+            const ip = document.getElementById('ipAddress').value;
+            const port = document.getElementById('port').value;
+            
+            addLog('WebSocket failed, trying HTTP connection...', 'warning');
+            
+            // Test HTTP connection
+            fetch(`http://${ip}:${port}/`)
+                .then(response => {
+                    if (response.ok) {
+                        isConnected = true;
+                        updateConnectionStatus(true);
+                        addLog('HTTP connection established', 'info');
+                    }
+                })
+                .catch(error => {
+                    addLog(`HTTP connection failed: ${error}`, 'error');
+                });
+        }
+
+        function disconnect() {
+            if (socket) {
+                socket.close();
+            }
+            isConnected = false;
+            updateConnectionStatus(false);
+            addLog('Disconnected', 'info');
+        }
+
+        function updateConnectionStatus(connected) {
+            const indicator = document.getElementById('statusIndicator');
+            const status = document.getElementById('connectionStatus');
+            
+            if (connected) {
+                indicator.classList.add('connected');
+                status.textContent = 'Connected';
+            } else {
+                indicator.classList.remove('connected');
+                status.textContent = 'Disconnected';
+            }
+        }
+
+        // Motor control functions
+        function updateMotor1(value) {
+            motor1Speed = parseInt(value);
+            document.getElementById('motor1Value').textContent = motor1Speed;
+            document.getElementById('motor1Slider').value = motor1Speed;
+            
+            if (isConnected) {
+                sendCommand(`MOTOR1 ${motor1Speed}`);
+            }
+        }
+
+        function updateMotor2(value) {
+            motor2Speed = parseInt(value);
+            document.getElementById('motor2Value').textContent = motor2Speed;
+            document.getElementById('motor2Slider').value = motor2Speed;
+            
+            if (isConnected) {
+                sendCommand(`MOTOR2 ${motor2Speed}`);
+            }
+        }
+
+        function setMotor1(speed) {
+            updateMotor1(speed);
+        }
+
+        function setMotor2(speed) {
+            updateMotor2(speed);
+        }
+
+        function sendCombined(x, y) {
+            if (!isConnected) return;
+            
+            // Send joystick-style command
+            sendCommand(`X ${x} Y ${y}`);
+            addLog(`Combined: X=${x}, Y=${y}`, 'info');
+        }
+
+        function emergencyStop() {
+            updateMotor1(0);
+            updateMotor2(0);
+            sendCommand('EMERGENCY_STOP');
+            addLog('EMERGENCY STOP ACTIVATED', 'error');
+        }
+
+        // Communication functions
+        function sendCommand(command) {
+            if (!isConnected) {
+                addLog('Not connected - cannot send command', 'error');
+                return;
+            }
+
+            const fullCommand = command + '\n';
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(fullCommand);
+                addLog(`Sent: ${command}`, 'info');
+            } else {
+                // Fallback to HTTP POST
+                const ip = document.getElementById('ipAddress').value;
+                const port = document.getElementById('port').value;
+                
+                fetch(`http://${ip}:${port}/command`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain',
+                    },
+                    body: fullCommand
+                })
+                .then(response => response.text())
+                .then(data => {
+                    addLog(`HTTP Sent: ${command}`, 'info');
+                    if (data) {
+                        addLog(`HTTP Response: ${data}`, 'info');
+                    }
+                })
+                .catch(error => {
+                    addLog(`HTTP Error: ${error}`, 'error');
+                });
+            }
+        }
+
+        function sendStatus() {
+            sendCommand('STATUS');
+        }
+
+        function sendHeartbeat() {
+            sendCommand('PING');
+        }
+
+        // Logging functions
+        function addLog(message, type = 'info') {
+            const logPanel = document.getElementById('logPanel');
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.className = `log-entry ${type}`;
+            logEntry.textContent = `[${timestamp}] ${message}`;
+            
+            logPanel.appendChild(logEntry);
+            logPanel.scrollTop = logPanel.scrollHeight;
+            
+            // Limit log entries
+            while (logPanel.children.length > 100) {
+                logPanel.removeChild(logPanel.firstChild);
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logPanel').innerHTML = '';
+            addLog('Logs cleared', 'info');
+        }
+
+        // Initialize on page load
+        window.onload = function() {
+            initJoystick();
+            addLog('Motor Control Web App loaded', 'info');
+            addLog('Enter ESP32-CAM IP and click Connect', 'info');
+        };
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case 'ArrowUp':
+                    sendCombined(0, 50);
+                    break;
+                case 'ArrowDown':
+                    sendCombined(0, -50);
+                    break;
+                case 'ArrowLeft':
+                    sendCombined(-50, 0);
+                    break;
+                case 'ArrowRight':
+                    sendCombined(50, 0);
+                    break;
+                case ' ':
+                    emergencyStop();
+                    e.preventDefault();
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', function(e) {
+            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                sendCombined(0, 0);
+            }
+        });
+    </script>
+</body>
+</html> 

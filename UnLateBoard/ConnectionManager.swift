@@ -38,6 +38,8 @@ class ConnectionManager: ObservableObject {
     @Published var lastHeartbeat: Date?
     @Published var currentWiFiSSID: String = "Unknown"
     @Published var isOnTargetNetwork: Bool = false
+    @Published var escStatus: String = "Unknown"
+    @Published var isESCArmed: Bool = false
     
     private var messageBuffer = ""
     private var isProcessingMessage = false
@@ -525,10 +527,23 @@ class ConnectionManager: ObservableObject {
         // Handle messages from Arduino via ESP32-CAM
         if message.hasPrefix("Status:") {
             handleStatusMessage("STATUS: " + message.replacingOccurrences(of: "Status:", with: ""))
+            parseESCStatus(message)
         } else if message.hasPrefix("OK") {
             Logger.shared.debug("Command acknowledged by Arduino")
         } else if message.hasPrefix("PONG") {
             handlePongMessage()
+        }
+    }
+    
+    private func parseESCStatus(_ statusMessage: String) {
+        if statusMessage.contains("ESCs: ARMED") {
+            escStatus = "ARMED"
+            isESCArmed = true
+            Logger.shared.info("✅ ESCs are ARMED and ready")
+        } else if statusMessage.contains("ESCs: NOT_ARMED") {
+            escStatus = "NOT ARMED"
+            isESCArmed = false
+            Logger.shared.warning("⚠️ ESCs are NOT ARMED - motors won't respond")
         }
     }
     
@@ -601,6 +616,12 @@ class ConnectionManager: ObservableObject {
     
     private func sendHeartbeat() {
         sendCommand("PING")
+    }
+    
+    // MARK: - ESC Control
+    func armESCs() {
+        Logger.shared.info("🔧 Sending ESC arming command")
+        sendCommand("ARM_ESC")
     }
     
     // MARK: - Connection Quality
