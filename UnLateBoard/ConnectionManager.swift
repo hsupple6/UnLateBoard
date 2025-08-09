@@ -645,9 +645,6 @@ class ConnectionManager: ObservableObject {
     func disconnect() {
         Logger.shared.info("Disconnecting from \(host):\(port)")
         
-        // Send emergency stop before disconnecting
-        sendRawMessage(message: "X 0 Y 0\n")
-        
         stopReconnectTimer()
         stopStatusPollingTimer()
         stopHeartbeatTimer()
