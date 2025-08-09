@@ -68,7 +68,11 @@ struct ThirdView: View {
         }
         
         .onAppear {
-            connectionManager.state = .connected
+            // Remove hardcoded connection state - let the real connection process work
+            // connectionManager.state = .connected
+            if connectionManager.state == .disconnected {
+                connectionManager.connect()
+            }
         }
     }
     
@@ -155,11 +159,8 @@ struct ThirdView: View {
             }
             
             Button(action: {
-                /*connectionManager.state = .connecting
-                connectionManager.connect()*/  // REDO THIS SJHIT
-                
-                connectionManager.state = .connected
-
+                connectionManager.state = .connecting
+                connectionManager.connect()
             }) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)

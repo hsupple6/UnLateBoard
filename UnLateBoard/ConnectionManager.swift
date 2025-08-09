@@ -15,6 +15,13 @@ class ConnectionManager: ObservableObject {
     private var connectionQueue = DispatchQueue(label: "com.app.connectionQueue", qos: .userInitiated)
     private var messageQueue = DispatchQueue(label: "com.app.messageQueue", qos: .userInitiated)
     
+    // Command buffering and flow control
+    private var commandBuffer: [String] = []
+    private var isProcessingCommands = false
+    private var lastCommandSent: Date?
+    private let minCommandInterval: TimeInterval = 0.05 // 50ms between commands
+    private let maxBufferSize = 10
+    
     // MARK: - Published Properties
     @Published var isConnected: Bool = false
     @Published var receivedMessage: String = ""
@@ -266,6 +273,9 @@ class ConnectionManager: ObservableObject {
     func sendRawMessage(message: String) {
         guard isConnected, let connection = connection else {
             Logger.shared.warning("Cannot send message: not connected")
+            DispatchQueue.main.async {
+                self.errorMessage = "Cannot send message: not connected"
+            }
             return
         }
         
@@ -276,11 +286,16 @@ class ConnectionManager: ObservableObject {
                     Logger.shared.error("Failed to send message: \(error.localizedDescription)")
                     DispatchQueue.main.async {
                         self?.errorMessage = "Failed to send message: \(error.localizedDescription)"
+                        // Trigger reconnection if send fails
+                        if self?.isConnected == true {
+                            self?.startReconnectProcess()
+                        }
                     }
                 } else {
                     Logger.shared.debug("Message sent successfully: \(message.trimmingCharacters(in: .whitespacesAndNewlines))")
                     DispatchQueue.main.async {
                         self?.lastCommand = message.trimmingCharacters(in: .whitespacesAndNewlines)
+                        self?.errorMessage = nil // Clear error on successful send
                     }
                 }
             })
@@ -296,7 +311,64 @@ class ConnectionManager: ObservableObject {
         }
         
         message += "\n"
-        sendRawMessage(message: message)
+        
+        // Use buffered sending for better flow control
+        bufferCommand(message)
+    }
+    
+    private func bufferCommand(_ command: String) {
+        messageQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Check buffer size
+            if self.commandBuffer.count >= self.maxBufferSize {
+                // Remove oldest command if buffer is full
+                self.commandBuffer.removeFirst()
+                Logger.shared.warning("Command buffer full, dropping oldest command")
+            }
+            
+            self.commandBuffer.append(command)
+            self.processCommandBuffer()
+        }
+    }
+    
+    private func processCommandBuffer() {
+        guard !isProcessingCommands && !commandBuffer.isEmpty else { return }
+        
+        isProcessingCommands = true
+        
+        // Check if enough time has passed since last command
+        let now = Date()
+        if let lastSent = lastCommandSent, now.timeIntervalSince(lastSent) < minCommandInterval {
+            // Schedule processing after the minimum interval
+            let delay = minCommandInterval - now.timeIntervalSince(lastSent)
+            DispatchQueue.global().asyncAfter(deadline: .now() + delay) { [weak self] in
+                self?.continueProcessingBuffer()
+            }
+        } else {
+            continueProcessingBuffer()
+        }
+    }
+    
+    private func continueProcessingBuffer() {
+        messageQueue.async { [weak self] in
+            guard let self = self, !self.commandBuffer.isEmpty else {
+                self?.isProcessingCommands = false
+                return
+            }
+            
+            let command = self.commandBuffer.removeFirst()
+            self.lastCommandSent = Date()
+            
+            // Send the command
+            self.sendRawMessage(message: command)
+            
+            // Continue processing if there are more commands
+            self.isProcessingCommands = false
+            if !self.commandBuffer.isEmpty {
+                self.processCommandBuffer()
+            }
+        }
     }
     
     // MARK: - Data Reception
@@ -347,17 +419,45 @@ class ConnectionManager: ObservableObject {
         updateConnectionQuality()
         
         // Handle different message types
-        if trimmedMessage.hasPrefix("STATUS:") {
-            handleStatusMessage(trimmedMessage)
-        } else if trimmedMessage.hasPrefix("MOTOR:") {
-            handleMotorMessage(trimmedMessage)
+        if trimmedMessage.hasPrefix("UART:") {
+            // Handle messages forwarded from ESP32-CAM
+            let uartMessage = trimmedMessage.replacingOccurrences(of: "UART: ", with: "")
+            handleUARTMessage(uartMessage)
+        } else if trimmedMessage.hasPrefix("WARNING:") {
+            handleWarningMessage(trimmedMessage)
         } else if trimmedMessage.hasPrefix("ERROR:") {
             handleErrorMessage(trimmedMessage)
         } else if trimmedMessage == "PONG" {
             handlePongMessage()
+        } else {
+            // Handle direct messages
+            if trimmedMessage.hasPrefix("STATUS:") {
+                handleStatusMessage(trimmedMessage)
+            } else if trimmedMessage.hasPrefix("MOTOR:") {
+                handleMotorMessage(trimmedMessage)
+            }
         }
         
         Logger.shared.debug("Received message: \(trimmedMessage)")
+    }
+    
+    private func handleUARTMessage(_ message: String) {
+        // Handle messages from Arduino via ESP32-CAM
+        if message.hasPrefix("Status:") {
+            handleStatusMessage("STATUS: " + message.replacingOccurrences(of: "Status:", with: ""))
+        } else if message.hasPrefix("OK") {
+            Logger.shared.debug("Command acknowledged by Arduino")
+        } else if message.hasPrefix("PONG") {
+            handlePongMessage()
+        }
+    }
+    
+    private func handleWarningMessage(_ message: String) {
+        let warning = message.replacingOccurrences(of: "WARNING:", with: "").trimmingCharacters(in: .whitespacesAndNewlines)
+        Logger.shared.warning("System warning: \(warning)")
+        DispatchQueue.main.async {
+            self.errorMessage = "Warning: \(warning)"
+        }
     }
     
     private func handleStatusMessage(_ message: String) {
@@ -449,6 +549,12 @@ class ConnectionManager: ObservableObject {
         
         connection?.cancel()
         connection = nil
+        
+        // Clear command buffer
+        messageQueue.async {
+            self.commandBuffer.removeAll()
+            self.isProcessingCommands = false
+        }
         
         DispatchQueue.main.async {
             self.isConnected = false
