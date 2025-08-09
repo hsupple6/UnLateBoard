@@ -376,6 +376,6 @@ struct PosDragger: View {
 
 struct ManualView_Previews: PreviewProvider {
     static var previews: some View {
-        ControlView(ConnectionManager: ConnectionManager(host: "", port: 0), dir: .constant(false))
+        ControlView(ConnectionManager: ConnectionManager.shared, dir: .constant(false))
     }
 }

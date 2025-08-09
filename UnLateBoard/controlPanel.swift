@@ -1195,7 +1195,7 @@ struct ControlView_Previews: PreviewProvider {
     @State static var dirPreview = false
 
     static var previews: some View {
-        ControlView(ConnectionManager: ConnectionManager(host: "0.0.0.0", port: 0000), dir: $dirPreview)
+        ControlView(ConnectionManager: ConnectionManager.shared, dir: $dirPreview)
     }
 }
 
