@@ -32,7 +32,7 @@ struct LoadingCircleAnimation: View {
 }
 
 struct ThirdView: View {
-    @StateObject private var connectionManager = ConnectionManager()
+    @StateObject private var connectionManager = ConnectionManager.shared
     @State private var animate = false
     @State private var navigateToControlView = true // change to false!
     @State private var showConnectionDetails = false

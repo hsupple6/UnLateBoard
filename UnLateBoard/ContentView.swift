@@ -302,19 +302,33 @@ struct ConnectionStatusView: View {
     @EnvironmentObject var connectionManager: ConnectionManager
     
     var body: some View {
-        HStack(spacing: 10) {
-            Circle()
-                .fill(connectionManager.isConnected ? Color.green : Color.red)
-                .frame(width: 10, height: 10)
+        VStack(spacing: 4) {
+            // WiFi Status
+            HStack(spacing: 6) {
+                Image(systemName: "wifi")
+                    .foregroundColor(connectionManager.isOnTargetNetwork ? .green : .orange)
+                    .font(.caption2)
+                
+                Text(connectionManager.currentWiFiSSID)
+                    .font(.caption2)
+                    .foregroundColor(connectionManager.isOnTargetNetwork ? .green : .orange)
+            }
             
-            Text(connectionManager.isConnected ? "Connected" : "Disconnected")
-                .font(.caption)
-                .foregroundColor(connectionManager.isConnected ? .green : .red)
+            // ESP32 Connection Status  
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(connectionManager.isConnected ? Color.green : Color.red)
+                    .frame(width: 8, height: 8)
+                
+                Text(connectionManager.isConnected ? "ESP32 Connected" : "ESP32 Disconnected")
+                    .font(.caption2)
+                    .foregroundColor(connectionManager.isConnected ? .green : .red)
+            }
         }
-        .padding(.horizontal, 15)
-        .padding(.vertical, 8)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
         .background(Color.gray.opacity(0.2))
-        .cornerRadius(20)
+        .cornerRadius(15)
     }
 }
 

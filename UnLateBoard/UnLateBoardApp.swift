@@ -7,10 +7,8 @@ struct UnLateBoardApp: App {
     @StateObject private var appState = AppStateManager()
     @StateObject private var navigationState = NavigationStateManager()
     @StateObject private var motorManager = MotorManagement()
-    @StateObject private var connectionManager = ConnectionManager(
-        host: AppConfig.Network.defaultHost,
-        port: AppConfig.Network.defaultPort
-    )
+    // Use shared ConnectionManager singleton
+    @StateObject private var connectionManager = ConnectionManager.shared
     @StateObject private var mlProcessor = MLProcessor()
     
     init() {
@@ -70,6 +68,14 @@ struct UnLateBoardApp: App {
         
         // Initialize app state
         appState.initializeApp()
+        
+        // Auto-connect if on the right network
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            if connectionManager.isOnTargetNetwork && !connectionManager.isConnected {
+                Logger.shared.info("Auto-connecting on app startup...")
+                connectionManager.connect()
+            }
+        }
         
         Logger.shared.info("App setup completed")
     }

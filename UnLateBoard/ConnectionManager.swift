@@ -1,9 +1,13 @@
 import SwiftUI
 import CoreBluetooth
 import Network
+import SystemConfiguration.CaptiveNetwork
 
-// MARK: - Enhanced Connection Manager
+// MARK: - Enhanced Connection Manager (Singleton)
 class ConnectionManager: ObservableObject {
+    // MARK: - Singleton
+    static let shared = ConnectionManager()
+    
     // MARK: - Properties
     private var connection: NWConnection?
     private(set) var host: String
@@ -32,9 +36,12 @@ class ConnectionManager: ObservableObject {
     @Published var connectionAttempts: Int = 0
     @Published var connectionQuality: ConnectionQuality = .unknown
     @Published var lastHeartbeat: Date?
+    @Published var currentWiFiSSID: String = "Unknown"
+    @Published var isOnTargetNetwork: Bool = false
     
     private var messageBuffer = ""
     private var isProcessingMessage = false
+    private var networkMonitor: NWPathMonitor?
     
     // MARK: - Connection Quality
     enum ConnectionQuality: String, CaseIterable {
@@ -76,10 +83,21 @@ class ConnectionManager: ObservableObject {
     }
     
     // MARK: - Initialization
-    init(host: String = AppConfig.Network.defaultHost, port: UInt16 = AppConfig.Network.defaultPort) {
+    private init(host: String = AppConfig.Network.defaultHost, port: UInt16 = AppConfig.Network.defaultPort) {
         self.host = host
         self.port = port
-        Logger.shared.info("ConnectionManager initialized with \(host):\(port)")
+        Logger.shared.info("ConnectionManager singleton initialized with \(host):\(port)")
+        startNetworkMonitoring()
+    }
+    
+    // Public method to update connection parameters if needed
+    func updateConnectionParameters(host: String, port: UInt16) {
+        if self.host != host || self.port != port {
+            Logger.shared.info("Updating connection parameters from \(self.host):\(self.port) to \(host):\(port)")
+            disconnect()
+            self.host = host
+            self.port = port
+        }
     }
     
     deinit {
@@ -87,6 +105,7 @@ class ConnectionManager: ObservableObject {
         stopReconnectTimer()
         stopStatusPollingTimer()
         stopHeartbeatTimer()
+        stopNetworkMonitoring()
     }
     
     // MARK: - Connection Management
@@ -572,6 +591,92 @@ class ConnectionManager: ObservableObject {
     
     func getConnectionInfo() -> String {
         return "\(host):\(port) - \(state.rawValue.capitalized)"
+    }
+    
+    // MARK: - Network Monitoring
+    private func startNetworkMonitoring() {
+        networkMonitor = NWPathMonitor(requiredInterfaceType: .wifi)
+        networkMonitor?.pathUpdateHandler = { [weak self] path in
+            DispatchQueue.main.async {
+                self?.handleNetworkPathUpdate(path)
+            }
+        }
+        
+        let queue = DispatchQueue(label: "NetworkMonitor")
+        networkMonitor?.start(queue: queue)
+        
+        // Also check current WiFi SSID
+        updateCurrentWiFiSSID()
+    }
+    
+    private func stopNetworkMonitoring() {
+        networkMonitor?.cancel()
+        networkMonitor = nil
+    }
+    
+    private func handleNetworkPathUpdate(_ path: NWPath) {
+        Logger.shared.info("Network path updated: \(path.status)")
+        
+        if path.status == .satisfied && path.usesInterfaceType(.wifi) {
+            updateCurrentWiFiSSID()
+            
+            // Auto-connect if on target network and not already connected
+            if isOnTargetNetwork && !isConnected && state != .connecting {
+                Logger.shared.info("On target WiFi network, auto-connecting...")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                    self?.connect()
+                }
+            }
+        } else {
+            currentWiFiSSID = "No WiFi"
+            isOnTargetNetwork = false
+            
+            if isConnected {
+                Logger.shared.warning("WiFi connection lost, disconnecting...")
+                disconnect()
+            }
+        }
+    }
+    
+    private func updateCurrentWiFiSSID() {
+        // Note: This requires iOS 14+ and proper entitlements
+        // For now, we'll use a simplified approach
+        let targetSSIDs = ["ESP32-CAM", "UnLateBoard", "ESP32-CAM-AP"]
+        
+        // In a real implementation, you'd get the actual SSID
+        // For now, we'll assume if we can connect to the default host, we're on the right network
+        DispatchQueue.global().async { [weak self] in
+            guard let self = self else { return }
+            
+            // Simple network check by attempting to reach the host
+            let testConnection = NWConnection(host: NWEndpoint.Host(self.host), 
+                                            port: NWEndpoint.Port(rawValue: self.port)!, 
+                                            using: .tcp)
+            
+            testConnection.stateUpdateHandler = { state in
+                DispatchQueue.main.async {
+                    switch state {
+                    case .ready:
+                        self.currentWiFiSSID = "ESP32-CAM" // Assume we're on the right network
+                        self.isOnTargetNetwork = true
+                        testConnection.cancel()
+                    case .failed, .cancelled:
+                        self.currentWiFiSSID = "Unknown WiFi"
+                        self.isOnTargetNetwork = false
+                        testConnection.cancel()
+                    default:
+                        break
+                    }
+                }
+            }
+            
+            testConnection.start(queue: DispatchQueue.global())
+            
+            // Cancel test connection after 2 seconds
+            DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
+                testConnection.cancel()
+            }
+        }
     }
 }
 

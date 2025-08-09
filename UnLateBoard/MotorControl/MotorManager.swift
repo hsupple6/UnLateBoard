@@ -60,6 +60,11 @@ class MotorManagement: ObservableObject {
         startMotorDataMonitoring()
     }
     
+    // Use shared connection if no explicit manager provided
+    private func getConnectionManager() -> ConnectionManager? {
+        return connectionManager ?? ConnectionManager.shared
+    }
+    
     func connectToMLProcessor(_ processor: MLProcessor) {
         self.mlProcessor = processor
         Logger.shared.info("MotorManagement connected to MLProcessor")
@@ -419,7 +424,7 @@ class MotorManagement: ObservableObject {
     
     // MARK: - Communication with ESP32
     private func sendMotorCommand(_ command: String, value: Any) {
-        guard let connectionManager = connectionManager else {
+        guard let connectionManager = getConnectionManager() else {
             Logger.shared.error("No connection manager available for motor command")
             return
         }

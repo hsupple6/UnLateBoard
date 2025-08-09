@@ -79,6 +79,11 @@ class MLProcessor: ObservableObject {
         Logger.shared.info("MLProcessor connected to ConnectionManager")
     }
     
+    // Use shared connection if no explicit manager provided
+    private func getConnectionManager() -> ConnectionManager? {
+        return connectionManager ?? ConnectionManager.shared
+    }
+    
     func startStreaming() {
         guard !isConnected else { 
             Logger.shared.warning("ML streaming already active")
