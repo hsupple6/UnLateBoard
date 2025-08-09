@@ -4,91 +4,257 @@ import Foundation
 import MapKit
 
 var place: MKMapItem? = nil
-// Separate component for the vertical slider
-struct ThickVerticalSlider: View {
-    var sliderWidth: CGFloat
-    var sliderHeight: CGFloat
-    var isDrag: Bool
 
-    var range: ClosedRange<Double>
-    var onEditingChanged: (Bool) -> Void = { _ in }
-    
-    // Customizable properties
-
-    var thumbSize: CGFloat = 28
-    var backgroundColor: Color = Color(.systemGray5)
-    var fillColor: Color = .blue
-    var thumbColor: Color = .white
-    
-    // Private state
-    @Binding var value: Double
-    @State var h: CGFloat = 0
-    @State private var isDragging = false
+// MARK: - Live Data Bar Component
+struct LiveDataBar: View {
+    var title: String
+    var value: Double
+    var maxValue: Double
+    var unit: String
+    var color: Color
+    var width: CGFloat = 40
+    var height: CGFloat = 200
     
     var body: some View {
-        GeometryReader { geometry in
+        VStack(spacing: 8) {
+            Text(title)
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+            
             ZStack(alignment: .bottom) {
-                // Background track
-                RoundedRectangle(cornerRadius: sliderWidth/2)
-                    .fill(backgroundColor)
-                    .frame(width: sliderWidth, height: sliderHeight)
+                // Background
+                RoundedRectangle(cornerRadius: width/2)
+                    .fill(Color.gray.opacity(0.3))
+                    .frame(width: width, height: height)
                 
-                
-                // Filled portion
-                RoundedRectangle(cornerRadius: sliderWidth/2)
-                    .fill(fillColor)
+                // Fill
+                RoundedRectangle(cornerRadius: width/2)
+                    .fill(color)
                     .frame(
-                        width: sliderWidth,
-                        height: (sliderHeight * CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound)) >= sliderWidth ? sliderHeight * CGFloat((value - range.lowerBound) / (range.upperBound - range.lowerBound)) : sliderWidth)
+                        width: width,
+                        height: max(width, height * CGFloat(value / maxValue))
                     )
-
             }
-            .frame(width: sliderWidth, height: sliderHeight)
-            .gesture(
-                (isDrag ?
-                DragGesture(minimumDistance: 0)
-                    .onChanged { gesture in
-                        isDragging = true
-                        
-                        // Calculate new value from drag position
-                        let dragPosition = sliderHeight - gesture.location.y
-                        let newValue = (Double(dragPosition) / Double(sliderHeight)) * (range.upperBound - range.lowerBound) + range.lowerBound
-                        
-                        // Clamp the value to the valid range
-                        self.value = max(min(newValue, range.upperBound), range.lowerBound)
-                        
-                        onEditingChanged(true)
-                    }
-                    .onEnded { _ in
-                        isDragging = false
-                        onEditingChanged(false)
-                    }
-                 : nil)
-            )
+            
+            VStack(spacing: 2) {
+                Text("\(Int(value))")
+                    .font(.system(size: 18, weight: .bold))
+                    .foregroundColor(.white)
+                Text(unit)
+                    .font(.caption2)
+                    .foregroundColor(.gray)
+            }
         }
-        .frame(width: sliderWidth, height: sliderHeight)
     }
 }
 
-// Main control view
+// MARK: - Turning Angle Display
+struct TurningAngleDisplay: View {
+    var angle: Double
+    
+    var body: some View {
+        VStack(spacing: 4) {
+            Text("Steering")
+                .font(.caption)
+                .fontWeight(.semibold)
+                .foregroundColor(.white)
+            
+            ZStack {
+                Circle()
+                    .stroke(Color.gray.opacity(0.3), lineWidth: 3)
+                    .frame(width: 60, height: 60)
+                
+                // Angle indicator
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.blue)
+                    .frame(width: 3, height: 25)
+                    .offset(y: -12)
+                    .rotationEffect(.degrees(angle))
+            }
+            
+            Text("\(Int(angle))°")
+                .font(.system(size: 14, weight: .semibold))
+                .foregroundColor(.white)
+        }
+    }
+}
+
+// MARK: - Virtual Joystick
+struct VirtualJoystick: View {
+    @Binding var xValue: Double
+    @Binding var yValue: Double
+    let size: CGFloat = 200
+    let knobSize: CGFloat = 60
+    
+    @State private var isDragging = false
+    @State private var knobPosition = CGPoint.zero
+    
+    var body: some View {
+        ZStack {
+            // Outer circle
+            Circle()
+                .fill(Color.gray.opacity(0.3))
+                .frame(width: size, height: size)
+            
+            // Inner guidelines
+            Circle()
+                .stroke(Color.gray.opacity(0.5), lineWidth: 1)
+                .frame(width: size * 0.6, height: size * 0.6)
+            
+            // Center lines
+            Rectangle()
+                .fill(Color.gray.opacity(0.5))
+                .frame(width: 1, height: size)
+            Rectangle()
+                .fill(Color.gray.opacity(0.5))
+                .frame(width: size, height: 1)
+            
+            // Knob
+            Circle()
+                .fill(Color.white)
+                .frame(width: knobSize, height: knobSize)
+                .shadow(radius: 8)
+                .offset(x: knobPosition.x, y: knobPosition.y)
+                .animation(.spring(response: 0.3), value: knobPosition)
+        }
+        .gesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { value in
+                    isDragging = true
+                    let center = CGPoint.zero
+                    let deltaX = value.location.x - size/2
+                    let deltaY = value.location.y - size/2
+                    let distance = sqrt(deltaX * deltaX + deltaY * deltaY)
+                    let maxRadius = (size - knobSize) / 2
+                    
+                    if distance <= maxRadius {
+                        knobPosition = CGPoint(x: deltaX, y: deltaY)
+                    } else {
+                        let angle = atan2(deltaY, deltaX)
+                        knobPosition = CGPoint(
+                            x: cos(angle) * maxRadius,
+                            y: sin(angle) * maxRadius
+                        )
+                    }
+                    
+                    // Convert to command values
+                    xValue = (knobPosition.x / maxRadius) * 125
+                    yValue = -(knobPosition.y / maxRadius) * 250 // Invert Y
+                }
+                .onEnded { _ in
+                    isDragging = false
+                    knobPosition = .zero
+                    xValue = 0
+                    yValue = 0
+                }
+        )
+    }
+}
+
+// MARK: - Settings Dropdown
+struct SettingsDropdown: View {
+    @Binding var maxSpeed: Double
+    @Binding var maxAcceleration: Double
+    @State private var isExpanded = false
+    
+    let speedOptions = [10.0, 15.0, 20.0, 25.0, 30.0, 35.0, 40.0, 50.0]
+    let accelOptions = [5.0, 6.0, 7.0, 8.0, 9.0, 10.0]
+    
+    var body: some View {
+        VStack {
+            Button(action: { isExpanded.toggle() }) {
+                HStack {
+                    Image(systemName: "gearshape.fill")
+                        .foregroundColor(.white)
+                    Text("Settings")
+                        .foregroundColor(.white)
+                        .font(.headline)
+                    Spacer()
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .foregroundColor(.white)
+                }
+                .padding()
+                .background(Color.black.opacity(0.7))
+                .cornerRadius(10)
+            }
+            
+            if isExpanded {
+                VStack(spacing: 15) {
+                    // Max Speed
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Max Speed: \(Int(maxSpeed)) mph")
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
+                            ForEach(speedOptions, id: \.self) { speed in
+                                Button("\(Int(speed))") {
+                                    maxSpeed = speed
+                                }
+                                .foregroundColor(maxSpeed == speed ? .black : .white)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(maxSpeed == speed ? Color.green : Color.gray.opacity(0.3))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                    
+                    // Max Acceleration
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Max Acceleration: \(Int(maxAcceleration))")
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                        
+                        LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 3), spacing: 8) {
+                            ForEach(accelOptions, id: \.self) { accel in
+                                Button("\(Int(accel))") {
+                                    maxAcceleration = accel
+                                }
+                                .foregroundColor(maxAcceleration == accel ? .black : .white)
+                                .padding(.vertical, 8)
+                                .padding(.horizontal, 12)
+                                .background(maxAcceleration == accel ? Color.orange : Color.gray.opacity(0.3))
+                                .cornerRadius(8)
+                            }
+                        }
+                    }
+                }
+                .padding()
+                .background(Color.black.opacity(0.8))
+                .cornerRadius(10)
+                .transition(.opacity)
+            }
+        }
+        .animation(.easeInOut(duration: 0.3), value: isExpanded)
+    }
+}
+
 // MARK: - Updated Control View
 struct ControlView: View {
     @Environment(\.presentationMode) var presentationMode
     @ObservedObject var ConnectionManager: ConnectionManager
     @StateObject var locationManager = LocationManager()
-    @EnvironmentObject var navigationState: NavigationStateManager // Add this
+    @EnvironmentObject var navigationState: NavigationStateManager
     @EnvironmentObject var motorManager: MotorManagement
     @EnvironmentObject var mlProcessor: MLProcessor
     @StateObject private var locationHandler = LocationHandler()
     
-    @State private var speedValue: Double = 25.0
-    @State private var accValue: Double = 5
+    // Joystick values
+    @State private var joystickX: Double = 0
+    @State private var joystickY: Double = 0
     
-    @State private var currSpeed: Double = 0;
-    @State private var currAcc: Double = 0;
+    // Live data
+    @State private var currentSpeed: Double = 0
+    @State private var currentAcceleration: Double = 0
+    @State private var turningAngle: Double = 0
     
-    @State private var navigate: Bool = false
+    // Settings (frontend only)
+    @State private var maxSpeed: Double = 25.0
+    @State private var maxAcceleration: Double = 8.0
     
+    // Control buttons
     @State private var isSet1: Bool = false
     @State private var isSet2: Bool = false
     @State private var isSet3: Bool = false
@@ -96,6 +262,9 @@ struct ControlView: View {
     @State private var isSet5: Bool = false
     @State private var isSet6: Bool = false
     @Binding var dir: Bool
+    
+    // Auto-kill flag
+    @State private var autoKillEnabled: Bool = true
 
     var body: some View {
         NavigationStack {
@@ -103,51 +272,98 @@ struct ControlView: View {
                 Color.black
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
-                    // Top Banner: ESP32 Connection Status + Directions
-                    HStack(spacing: 12) {
-                        // ESP32 Connection Status
-                        Circle()
-                            .fill(ConnectionManager.isConnected ? Color.green : Color.red)
-                            .frame(width: 12, height: 12)
-                        Text(ConnectionManager.isConnected ? "ESP32 Connected" : "ESP32 Disconnected")
-                            .font(.caption)
-                            .foregroundColor(ConnectionManager.isConnected ? .green : .red)
-                        Spacer()
-                        // Back Button
-                        Button("Back") {
-                            presentationMode.wrappedValue.dismiss()
+                VStack(spacing: 15) {
+                    // Top Header with Settings Dropdown
+                    VStack(spacing: 10) {
+                        HStack {
+                            // Connection Status
+                            Circle()
+                                .fill(ConnectionManager.isConnected ? Color.green : Color.red)
+                                .frame(width: 12, height: 12)
+                            Text(ConnectionManager.isConnected ? "Connected" : "Disconnected")
+                                .font(.caption)
+                                .foregroundColor(ConnectionManager.isConnected ? .green : .red)
+                            
+                            Spacer()
+                            
+                            // Auto-kill indicator
+                            HStack(spacing: 4) {
+                                Image(systemName: autoKillEnabled ? "shield.checkered" : "shield.slash")
+                                    .foregroundColor(autoKillEnabled ? .green : .orange)
+                                Text("Auto-Kill")
+                                    .font(.caption2)
+                                    .foregroundColor(.white)
+                            }
+                            
+                            Spacer()
+                            
+                            Button("Back") {
+                                presentationMode.wrappedValue.dismiss()
+                            }
+                            .foregroundColor(.white)
+                            .font(.headline)
                         }
-                        .foregroundColor(.white)
-                        .font(.headline)
+                        
+                        // Settings Dropdown
+                        SettingsDropdown(maxSpeed: $maxSpeed, maxAcceleration: $maxAcceleration)
                     }
                     .padding(.horizontal)
-                    .padding(.top, 10)
-                    .padding(.bottom, 4)
-                    .background(BlurView(style: .systemMaterialDark))
-                    // Directions Banner
+                    
+                    // Navigation Banner
                     if navigationState.isNavigating {
                         DirectionsBanner()
                             .environmentObject(navigationState)
-                            .padding(.bottom, 4)
                     }
-                    // Title
-                    Text("Control Panel")
-                        .font(.largeTitle)
-                        .fontWeight(.bold)
-                        .foregroundColor(.white)
-                        .padding(.bottom, 10)
                     
-                    // Autopilot Switch
-                    VStack(spacing: 15) {
-                        HStack {
-                            Image(systemName: "brain.head.profile")
-                                .font(.title2)
-                                .foregroundColor(.purple)
+                    // Main Control Section - Joystick at Top
+                    VStack(spacing: 20) {
+                        // Joystick with Side Data
+                        HStack(spacing: 30) {
+                            // Left Side - Current Acceleration
+                            LiveDataBar(
+                                title: "Accel",
+                                value: currentAcceleration,
+                                maxValue: maxAcceleration,
+                                unit: "m/s²",
+                                color: .orange
+                            )
                             
-                            Text("AUTOPILOT")
-                                .font(.headline)
-                                .fontWeight(.bold)
+                            // Center - Virtual Joystick
+                            VStack(spacing: 15) {
+                                Text("Manual Control")
+                                    .font(.title2)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.white)
+                                
+                                VirtualJoystick(xValue: $joystickX, yValue: $joystickY)
+                                    .onChange(of: joystickX) { _ in sendJoystickCommand() }
+                                    .onChange(of: joystickY) { _ in sendJoystickCommand() }
+                                
+                                // Turning Angle Display
+                                TurningAngleDisplay(angle: turningAngle)
+                            }
+                            
+                            // Right Side - Current Speed
+                            LiveDataBar(
+                                title: "Speed",
+                                value: currentSpeed,
+                                maxValue: maxSpeed,
+                                unit: "mph",
+                                color: .green
+                            )
+                        }
+                        .padding(.horizontal)
+                        
+                        // Autopilot Section
+                        VStack(spacing: 15) {
+                            HStack {
+                                Image(systemName: "brain.head.profile")
+                                    .font(.title2)
+                                    .foregroundColor(.purple)
+                                
+                                Text("AUTOPILOT")
+                                    .font(.headline)
+                                    .fontWeight(.bold)
                                 .foregroundColor(.white)
                             
                             Spacer()
@@ -215,125 +431,14 @@ struct ControlView: View {
                             .environmentObject(locationHandler)
                     }
                     
-                    HStack(spacing: 20) {
-                        VStack {
-                            ThickVerticalSlider(
-                                sliderWidth: 60.0,
-                                sliderHeight: 250.0,
-                                isDrag: true,
-                                range: 0...50,
-                                fillColor: .green,
-                                value: $motorManager.maxVelo,
-                            )
-                            .onChange(of: motorManager.maxVelo) {
-                                ConnectionManager.sendRawMessage(message: "SV \(motorManager.maxVelo)\n")
-                            }
-                            
-                            VStack {
-                                Text("Max Speed")
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                                    .fixedSize()
-                                Text("\(Int(motorManager.maxVelo))")
-                                    .font(.system(size: 30, weight: .bold))
-                                    .foregroundColor(.white)
-                                Text("MPH")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .frame(width: 50)
-                            }
-                        }
-
-                        Spacer()
+                    // Control Buttons Section
+                    VStack(spacing: 20) {
+                        Text("Control Functions")
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
                         
-                        VStack {
-                            ThickVerticalSlider(
-                                sliderWidth: 30,
-                                sliderHeight: 200,
-                                isDrag: true,
-                                range: 0...(speedValue < 40
-                                            ? speedValue + 10
-                                            : speedValue + Double(50 % max(1, Int(speedValue)))),
-                                value: $speedValue,
-                            )
-                            .onChange(of: speedValue) {
-                                ConnectionManager.sendRawMessage(message: "SPEED \(Int(speedValue))\n")
-                            }
-                            
-                            VStack {
-                                Text("Speed")
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                                Text("\(Int(speedValue))")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.white)
-                                Text("MPH")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .frame(width: 50)
-                            }
-                        }
-
-                        Spacer()
-                        
-                        VStack {
-                            ThickVerticalSlider(
-                                sliderWidth: 30,
-                                sliderHeight: 200,
-                                isDrag: true,
-                                range: 1...4,
-                                fillColor: .orange,
-                                value: $motorManager.currentAccel,
-                            )
-                            .onChange(of: motorManager.currentAccel) {
-                                ConnectionManager.sendRawMessage(message: "ACC \(Int(motorManager.currentAccel))\n")
-                            }
-                            
-                            VStack {
-                                Text("Acc")
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                                Text("\(Int(motorManager.currentAccel))")
-                                    .font(.system(size: 30, weight: .bold))
-                                    .foregroundColor(.white)
-                                Text("M/S²")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .frame(width: 50)
-                            }
-                        }
-
-                        Spacer()
-
-                        VStack {
-                            ThickVerticalSlider(
-                                sliderWidth: 60,
-                                sliderHeight: 250,
-                                isDrag: true,
-                                range: 1...10,
-                                fillColor: .blue,
-                                value: $motorManager.maxAccel,
-                            )
-                            .onChange(of: motorManager.maxAccel) {
-                                ConnectionManager.sendRawMessage(message: "MAXACC \(Int(motorManager.maxAccel))\n")
-                            }
-                            VStack {
-                                Text("Max Acc")
-                                    .foregroundColor(.white)
-                                    .font(.headline)
-                                Text("\(Int(motorManager.maxAccel))")
-                                    .font(.system(size: 36, weight: .bold))
-                                    .foregroundColor(.white)
-                                Text("M/S²")
-                                    .font(.subheadline)
-                                    .foregroundColor(.white)
-                                    .frame(width: 50)
-                            }
-                        }
-                    }
-                    .padding()
-
-                    HStack(spacing: 20) {
+                        HStack(spacing: 20) {
                         // First Column
                         VStack(spacing: 40) {
                             // Light Button
@@ -545,6 +650,27 @@ struct ControlView: View {
             .hidden()
             .navigationBarHidden(true)
         }
+        .onReceive(ConnectionManager.$isConnected) { isConnected in
+            // Auto-kill motor when disconnected
+            if autoKillEnabled && !isConnected {
+                sendEmergencyStop()
+            }
+        }
+    }
+    
+    // MARK: - Helper Functions
+    private func sendJoystickCommand() {
+        guard ConnectionManager.isConnected else { return }
+        let command = "X \(Int(joystickX)) Y \(Int(joystickY))"
+        ConnectionManager.sendRawMessage(message: "\(command)\n")
+        
+        // Update live data displays
+        turningAngle = joystickX / 2 // Updated calculation per your Arduino change
+        // You can add more live data updates here based on feedback from Arduino
+    }
+    
+    private func sendEmergencyStop() {
+        ConnectionManager.sendRawMessage(message: "X 0 Y 0\n")
     }
 }
 
