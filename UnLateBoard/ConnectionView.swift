@@ -37,7 +37,7 @@ struct ThirdView: View {
     @State private var navigateToControlView = true // change to false!
     @State private var showConnectionDetails = false
     @State private var customHost = "192.168.4.1"
-    @State private var customPort = "3333"
+    @State private var customPort = "8080"
     
     var body: some View {
         ZStack {

@@ -5,9 +5,9 @@ const express = require('express');
 const cors = require('cors');
 
 // Configuration
-const ESP32_HOST = '192.168.4.1';
-const ESP32_PORT = 3333;
-const BRIDGE_PORT = 8080;
+const ARDUINO_HOST = '192.168.4.1';        // Arduino bt_classic WiFi AP
+const ARDUINO_PORT = 8080;                 // Arduino control server port
+const BRIDGE_PORT = 3000;                  // Different port for bridge server
 
 // Express app for HTTP endpoints
 const app = express();
@@ -21,13 +21,13 @@ const server = http.createServer(app);
 // WebSocket server for real-time communication
 const wss = new WebSocket.Server({ server });
 
-// ESP32 TCP connection
-let esp32Socket = null;
-let isConnectedToESP32 = false;
+// Arduino TCP connection
+let arduinoSocket = null;
+let isConnectedToArduino = false;
 let webClients = new Set();
 
-// Buffer for incoming data from ESP32
-let esp32Buffer = '';
+// Buffer for incoming data from Arduino
+let arduinoBuffer = '';
 
 // Logging function
 function log(message, type = 'INFO') {
@@ -35,70 +35,70 @@ function log(message, type = 'INFO') {
     console.log(`[${timestamp}] [${type}] ${message}`);
 }
 
-// Connect to ESP32-CAM
-function connectToESP32() {
-    log('Attempting to connect to ESP32-CAM...');
+// Connect to Arduino bt_classic
+function connectToArduino() {
+    log('Attempting to connect to Arduino bt_classic...');
     
-    esp32Socket = new net.Socket();
+    arduinoSocket = new net.Socket();
     
-    esp32Socket.connect(ESP32_PORT, ESP32_HOST, () => {
-        log('✅ Connected to ESP32-CAM successfully!');
-        isConnectedToESP32 = true;
-        broadcastToClients('ESP32_STATUS', 'Connected to ESP32-CAM');
+    arduinoSocket.connect(ARDUINO_PORT, ARDUINO_HOST, () => {
+        log('✅ Connected to Arduino bt_classic successfully!');
+        isConnectedToArduino = true;
+        broadcastToClients('ARDUINO_STATUS', 'Connected to Arduino bt_classic');
         
-        // Send initial handshake
-        esp32Socket.write('HELLO\n');
+        // Send initial handshake (Arduino doesn't need this, but ESP32 part might)
+        // arduinoSocket.write('HELLO\n');
     });
     
-    esp32Socket.on('data', (data) => {
-        esp32Buffer += data.toString();
+    arduinoSocket.on('data', (data) => {
+        arduinoBuffer += data.toString();
         
         // Process complete lines
-        while (esp32Buffer.includes('\n')) {
-            const lineEnd = esp32Buffer.indexOf('\n');
-            const line = esp32Buffer.substring(0, lineEnd).trim();
-            esp32Buffer = esp32Buffer.substring(lineEnd + 1);
+        while (arduinoBuffer.includes('\n')) {
+            const lineEnd = arduinoBuffer.indexOf('\n');
+            const line = arduinoBuffer.substring(0, lineEnd).trim();
+            arduinoBuffer = arduinoBuffer.substring(lineEnd + 1);
             
             if (line.length > 0) {
-                log(`📥 ESP32: ${line}`);
-                broadcastToClients('ESP32_RESPONSE', line);
+                log(`📥 Arduino: ${line}`);
+                broadcastToClients('ARDUINO_RESPONSE', line);
             }
         }
     });
     
-    esp32Socket.on('close', () => {
-        log('❌ ESP32-CAM connection closed');
-        isConnectedToESP32 = false;
-        broadcastToClients('ESP32_STATUS', 'Disconnected from ESP32-CAM');
+    arduinoSocket.on('close', () => {
+        log('❌ Arduino bt_classic connection closed');
+        isConnectedToArduino = false;
+        broadcastToClients('ARDUINO_STATUS', 'Disconnected from Arduino bt_classic');
         
         // Reconnect after 3 seconds
-        setTimeout(connectToESP32, 3000);
+        setTimeout(connectToArduino, 3000);
     });
     
-    esp32Socket.on('error', (err) => {
-        log(`❌ ESP32-CAM connection error: ${err.message}`, 'ERROR');
-        isConnectedToESP32 = false;
-        broadcastToClients('ESP32_STATUS', `Connection error: ${err.message}`);
+    arduinoSocket.on('error', (err) => {
+        log(`❌ Arduino bt_classic connection error: ${err.message}`, 'ERROR');
+        isConnectedToArduino = false;
+        broadcastToClients('ARDUINO_STATUS', `Connection error: ${err.message}`);
         
         // Reconnect after 5 seconds
-        setTimeout(connectToESP32, 5000);
+        setTimeout(connectToArduino, 5000);
     });
 }
 
-// Send command to ESP32
-function sendToESP32(command) {
-    if (!isConnectedToESP32 || !esp32Socket) {
-        log(`❌ Cannot send command - not connected to ESP32: ${command}`, 'ERROR');
+// Send command to Arduino
+function sendToArduino(command) {
+    if (!isConnectedToArduino || !arduinoSocket) {
+        log(`❌ Cannot send command - not connected to Arduino: ${command}`, 'ERROR');
         return false;
     }
     
     try {
         const fullCommand = command.endsWith('\n') ? command : command + '\n';
-        esp32Socket.write(fullCommand);
-        log(`📤 Sent to ESP32: ${command}`);
+        arduinoSocket.write(fullCommand);
+        log(`📤 Sent to Arduino: ${command}`);
         return true;
     } catch (error) {
-        log(`❌ Error sending to ESP32: ${error.message}`, 'ERROR');
+        log(`❌ Error sending to Arduino: ${error.message}`, 'ERROR');
         return false;
     }
 }
@@ -121,8 +121,8 @@ wss.on('connection', (ws) => {
     
     // Send current status
     ws.send(JSON.stringify({
-        type: 'ESP32_STATUS',
-        data: isConnectedToESP32 ? 'Connected to ESP32-CAM' : 'Disconnected from ESP32-CAM',
+        type: 'ARDUINO_STATUS',
+        data: isConnectedToArduino ? 'Connected to Arduino bt_classic' : 'Disconnected from Arduino bt_classic',
         timestamp: Date.now()
     }));
     
@@ -132,7 +132,7 @@ wss.on('connection', (ws) => {
             
             if (data.type === 'COMMAND') {
                 log(`🌐 Web command: ${data.command}`);
-                if (sendToESP32(data.command)) {
+                if (sendToArduino(data.command)) {
                     ws.send(JSON.stringify({
                         type: 'COMMAND_SENT',
                         data: data.command,
@@ -165,12 +165,12 @@ wss.on('connection', (ws) => {
 // HTTP endpoints
 app.get('/', (req, res) => {
     res.json({
-        status: 'ESP32-CAM Bridge Server',
-        esp32Connected: isConnectedToESP32,
+        status: 'Arduino bt_classic Bridge Server',
+        arduinoConnected: isConnectedToArduino,
         connectedClients: webClients.size,
         endpoints: {
             '/status': 'GET - Server status',
-            '/command': 'POST - Send command to ESP32',
+            '/command': 'POST - Send command to Arduino',
             '/ws': 'WebSocket - Real-time communication'
         }
     });
@@ -178,9 +178,9 @@ app.get('/', (req, res) => {
 
 app.get('/status', (req, res) => {
     res.json({
-        esp32Connected: isConnectedToESP32,
-        esp32Host: ESP32_HOST,
-        esp32Port: ESP32_PORT,
+        arduinoConnected: isConnectedToArduino,
+        arduinoHost: ARDUINO_HOST,
+        arduinoPort: ARDUINO_PORT,
         connectedClients: webClients.size,
         uptime: process.uptime()
     });
@@ -195,7 +195,7 @@ app.post('/command', (req, res) => {
     
     log(`🌐 HTTP command: ${command}`);
     
-    if (sendToESP32(command)) {
+    if (sendToArduino(command)) {
         res.json({ 
             success: true, 
             command: command,
@@ -204,7 +204,7 @@ app.post('/command', (req, res) => {
     } else {
         res.status(500).json({ 
             success: false, 
-            error: 'Failed to send command to ESP32',
+            error: 'Failed to send command to Arduino',
             command: command
         });
     }
@@ -215,21 +215,21 @@ app.options('*', cors());
 
 // Start the bridge server
 server.listen(BRIDGE_PORT, () => {
-    log(`🚀 ESP32-CAM Bridge Server started on port ${BRIDGE_PORT}`);
-    log(`📡 Will connect to ESP32-CAM at ${ESP32_HOST}:${ESP32_PORT}`);
+    log(`🚀 Arduino bt_classic Bridge Server started on port ${BRIDGE_PORT}`);
+    log(`📡 Will connect to Arduino bt_classic at ${ARDUINO_HOST}:${ARDUINO_PORT}`);
     log(`🌐 WebSocket endpoint: ws://localhost:${BRIDGE_PORT}`);
     log(`🔗 HTTP endpoint: http://localhost:${BRIDGE_PORT}`);
     
-    // Connect to ESP32-CAM
-    connectToESP32();
+    // Connect to Arduino bt_classic
+    connectToArduino();
 });
 
 // Graceful shutdown
 process.on('SIGINT', () => {
     log('📴 Shutting down bridge server...');
     
-    if (esp32Socket) {
-        esp32Socket.destroy();
+    if (arduinoSocket) {
+        arduinoSocket.destroy();
     }
     
     webClients.forEach(client => {
@@ -242,11 +242,11 @@ process.on('SIGINT', () => {
     });
 });
 
-// Keep alive ping to ESP32
+// Keep alive ping to Arduino
 setInterval(() => {
-    if (isConnectedToESP32) {
-        sendToESP32('PING');
+    if (isConnectedToArduino) {
+        sendToArduino('PING');
     }
 }, 30000); // Every 30 seconds
 
-log('🔧 ESP32-CAM Bridge Server initializing...'); 
+log('🔧 Arduino bt_classic Bridge Server initializing...'); 

@@ -4,8 +4,10 @@ import SwiftUI
 struct AppConfig {
     // MARK: - Network Configuration
     struct Network {
-        static let defaultHost = "192.168.4.1"
-        static let defaultPort: UInt16 = 3333
+        static let defaultHost = "192.168.4.1" // Arduino bt_classic WiFi AP
+        static let defaultPort: UInt16 = 8080  // Arduino control server port (was 3333)
+        static let cameraHost = "192.168.4.1"  // ESP32-CAM WiFi AP  
+        static let cameraPort: UInt16 = 3333   // ESP32-CAM streaming port
         static let connectionTimeout: TimeInterval = 10.0
         static let reconnectInterval: TimeInterval = 3.0
         static let maxReconnectAttempts = 5

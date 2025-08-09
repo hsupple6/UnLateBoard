@@ -148,3 +148,39 @@ This setup is intended for local development and testing. For production use:
 ---
 
 **Happy motor controlling!** 🚗💨
+
+## ✅ Fixed the Command Issue!
+
+The problem was that the web app was sending `MOTOR1` and `MOTOR2` commands, but your Arduino only understands:
+
+- ✅ `X [steering] Y [throttle]` (joystick style)
+- ✅ `STATUS` (status request)  
+- ✅ `PING` (heartbeat)
+- ✅ `SPEED [value]` (speed limit)
+
+### **🔧 What I Fixed:**
+
+1. **Individual Motor Controls** now convert to `X Y` format:
+   - Motor1=25%, Motor2=75% → `X 100 Y 50` (steering right, medium throttle)
+   - Motor1=50%, Motor2=50% → `X 0 Y 50` (straight, medium throttle)
+
+2. **Emergency Stop** now sends `X 0 Y 0` instead of `EMERGENCY_STOP`
+
+3. **Combined Controls** were already correct (using `sendCombined()`)
+
+### **🧪 Test It Now:**
+
+1. **Make sure your bridge server is running**:
+   ```bash
+   npm start
+   ```
+
+2. **Try the individual motor sliders** - you should now see:
+   ```
+   ESP32-CAM logs: [123ms] [SERIAL] Received: 'X 0 Y 25'
+   Arduino logs: [123ms] [JOYSTICK] Raw X=0.00, Y=25.00 -> Throttle=10.00%, Steering=0.00°
+   ```
+
+3. **Try the joystick and arrow keys** - these should work immediately
+
+Now your motor commands should actually reach the Arduino and control the motors! 🚗💨

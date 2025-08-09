@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ESP32-CAM Motor Control</title>
+    <title>UnLateBoard Motor Control</title>
     <style>
         * {
             margin: 0;
@@ -252,7 +252,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>🚗 ESP32-CAM Motor Control</h1>
+            <h1>🚗 UnLateBoard Motor Control</h1>
             <div class="connection-status">
                 <div class="status-indicator" id="statusIndicator"></div>
                 <span id="connectionStatus">Disconnected</span>
@@ -261,15 +261,15 @@
             <!-- Bridge Server Solution -->
             <div style="background: rgba(0, 255, 136, 0.2); border: 1px solid #00ff88; border-radius: 10px; padding: 15px; margin: 20px 0; color: #00ff88;">
                 <h4>🌉 Bridge Server Solution</h4>
-                <p>This web app connects to a Node.js bridge server that communicates with your ESP32-CAM.</p>
+                <p>This web app connects to a Node.js bridge server that communicates with your UnLateBoard.</p>
                 <p><strong>Setup Instructions:</strong></p>
                 <ol style="margin: 10px 0; padding-left: 20px;">
                     <li>📥 Install Node.js on your computer</li>
                     <li>⚡ Run: <code>npm install</code> (in the same folder as these files)</li>
                     <li>🚀 Run: <code>npm start</code> (starts the bridge server)</li>
-                    <li>🌐 Connect this web app to localhost:8080</li>
+                    <li>🌐 Connect this web app to localhost:3000</li>
                 </ol>
-                <p><em>The bridge server will connect to your ESP32-CAM and relay commands!</em></p>
+                <p><em>The bridge server will connect to your UnLateBoard and relay commands!</em></p>
             </div>
         </div>
 
@@ -277,7 +277,7 @@
         <div class="connection-panel">
             <h3>🔗 Connection Settings</h3>
             <div class="input-group">
-                <input type="text" id="bridgeAddress" placeholder="Bridge Server Address" value="localhost:8080">
+                <input type="text" id="bridgeAddress" placeholder="Bridge Server Address" value="localhost:3000">
                 <button class="btn btn-primary" onclick="connect()">Connect to Bridge</button>
                 <button class="btn btn-danger" onclick="disconnect()">Disconnect</button>
             </div>
@@ -351,7 +351,7 @@
         <div class="control-panel">
             <h3>📊 System Logs</h3>
             <div class="log-panel" id="logPanel">
-                <div class="log-entry info">System ready. Connect to ESP32-CAM to begin.</div>
+                <div class="log-entry info">System ready. Connect to UnLateBoard to begin.</div>
             </div>
             <div class="button-group" style="margin-top: 15px;">
                 <button class="btn btn-secondary" onclick="clearLogs()">Clear Logs</button>
@@ -505,11 +505,11 @@
         
         function handleBridgeMessage(data) {
             switch (data.type) {
-                case 'ESP32_STATUS':
-                    addLog(`📡 ESP32 Status: ${data.data}`, 'info');
+                case 'ARDUINO_STATUS':
+                    addLog(`📡 Arduino Status: ${data.data}`, 'info');
                     break;
-                case 'ESP32_RESPONSE':
-                    addLog(`📥 ESP32 Response: ${data.data}`, 'info');
+                case 'ARDUINO_RESPONSE':
+                    addLog(`📥 Arduino Response: ${data.data}`, 'info');
                     break;
                 case 'COMMAND_SENT':
                     addLog(`✅ Command sent: ${data.data}`, 'info');
@@ -660,8 +660,8 @@
         // Initialize on page load
         window.onload = function() {
             initJoystick();
-            addLog('Motor Control Web App loaded', 'info');
-            addLog('Enter ESP32-CAM IP and click Connect', 'info');
+            addLog('UnLateBoard Motor Control Web App loaded', 'info');
+            addLog('Start the bridge server and click Connect', 'info');
         };
 
         // Keyboard shortcuts

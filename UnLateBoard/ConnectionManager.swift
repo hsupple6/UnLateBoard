@@ -129,14 +129,14 @@ class ConnectionManager: ObservableObject {
             DispatchQueue.main.async {
                 switch state {
                 case .ready:
-                    Logger.shared.info("✅ Basic connectivity test PASSED - ESP32-CAM is reachable")
+                    Logger.shared.info("✅ Basic connectivity test PASSED - Arduino bt_classic is reachable")
                     testConnection.cancel()
                 case .failed(let error):
                     Logger.shared.error("❌ Basic connectivity test FAILED: \(error.localizedDescription)")
                     Logger.shared.error("💡 Possible issues:")
-                    Logger.shared.error("   - Not connected to ESP32-CAM WiFi network")
-                    Logger.shared.error("   - ESP32-CAM not running or crashed")
-                    Logger.shared.error("   - TCP server not started on ESP32-CAM")
+                    Logger.shared.error("   - Not connected to UnLateBoard-Control WiFi network")
+                    Logger.shared.error("   - Arduino bt_classic not running or crashed")
+                    Logger.shared.error("   - TCP server not started on Arduino")
                     Logger.shared.error("   - Firewall blocking connection")
                     testConnection.cancel()
                 case .cancelled:
@@ -180,7 +180,7 @@ class ConnectionManager: ObservableObject {
         }
         
         Logger.shared.info("🚀 Attempting connection to \(host):\(port) (attempt \(connectionAttempts))")
-        Logger.shared.info("📡 Target should be ESP32-CAM TCP server on port 3333")
+        Logger.shared.info("📡 Target should be Arduino bt_classic control server on port 8080")
         
         let parameters = NWParameters.tcp
         parameters.allowLocalEndpointReuse = true
@@ -224,11 +224,11 @@ class ConnectionManager: ObservableObject {
                 Logger.shared.info("🔧 Connection setup...")
             case .waiting(let error):
                 Logger.shared.warning("⏳ Connection waiting: \(error.localizedDescription)")
-                Logger.shared.warning("This usually means the ESP32-CAM TCP server is not responding")
+                Logger.shared.warning("This usually means the Arduino bt_classic TCP server is not responding")
                 self.handleConnectionFailure(error: error)
             case .failed(let error):
                 Logger.shared.error("❌ Connection failed: \(error.localizedDescription)")
-                Logger.shared.error("Check if ESP32-CAM is running and accessible at \(self.host):\(self.port)")
+                Logger.shared.error("Check if Arduino bt_classic is running and accessible at \(self.host):\(self.port)")
                 self.handleConnectionFailure(error: error)
             case .cancelled:
                 Logger.shared.info("🚫 Connection cancelled")
@@ -728,12 +728,12 @@ class ConnectionManager: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            // For now, assume if we have WiFi and are trying to connect to the default ESP32 IP,
-            // we're likely on the ESP32-CAM network
+            // For now, assume if we have WiFi and are trying to connect to the default Arduino IP,
+            // we're likely on the UnLateBoard-Control network
             if self.host == AppConfig.Network.defaultHost {
-                self.currentWiFiSSID = "ESP32-CAM Network"
+                self.currentWiFiSSID = "UnLateBoard-Control Network"
                 self.isOnTargetNetwork = true
-                Logger.shared.info("Detected likely ESP32-CAM network connection")
+                Logger.shared.info("Detected likely UnLateBoard-Control network connection")
             } else {
                 self.currentWiFiSSID = "Other WiFi"
                 self.isOnTargetNetwork = false

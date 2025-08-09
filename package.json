@@ -1,7 +1,7 @@
 {
-  "name": "esp32-cam-bridge",
+  "name": "unlateboard-bridge",
   "version": "1.0.0",
-  "description": "Bridge server for ESP32-CAM motor control via web interface",
+  "description": "Bridge server for UnLateBoard Arduino motor control via web interface",
   "main": "ESP32_Bridge_Server.js",
   "scripts": {
     "start": "node ESP32_Bridge_Server.js",
@@ -16,7 +16,8 @@
     "nodemon": "^3.0.1"
   },
   "keywords": [
-    "esp32",
+    "arduino",
+    "unlateboard",
     "motor-control",
     "websocket",
     "tcp-bridge"
