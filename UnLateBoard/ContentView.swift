@@ -312,6 +312,22 @@ struct ConnectionStatusView: View {
                 Text(connectionManager.currentWiFiSSID)
                     .font(.caption2)
                     .foregroundColor(connectionManager.isOnTargetNetwork ? .green : .orange)
+                
+                Button(action: {
+                    connectionManager.refreshNetworkStatus()
+                }) {
+                    Image(systemName: "arrow.clockwise")
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                }
+                
+                Button(action: {
+                    connectionManager.testBasicConnectivity()
+                }) {
+                    Image(systemName: "network")
+                        .font(.caption2)
+                        .foregroundColor(.purple)
+                }
             }
             
             // ESP32 Connection Status  

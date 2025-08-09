@@ -68,10 +68,14 @@ struct ThirdView: View {
         }
         
         .onAppear {
-            // Remove hardcoded connection state - let the real connection process work
-            // connectionManager.state = .connected
-            if connectionManager.state == .disconnected {
-                connectionManager.connect()
+            // Refresh network status when view appears
+            connectionManager.refreshNetworkStatus()
+            
+            // Connect if not already connected and on target network
+            if connectionManager.state == .disconnected && connectionManager.isOnTargetNetwork {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    connectionManager.connect()
+                }
             }
         }
     }

@@ -97,6 +97,59 @@ class ConnectionManager: ObservableObject {
             disconnect()
             self.host = host
             self.port = port
+            updateCurrentWiFiSSID() // Update network detection
+        }
+    }
+    
+    // Public method to force network detection update
+    func refreshNetworkStatus() {
+        Logger.shared.info("Manually refreshing network status")
+        updateCurrentWiFiSSID()
+        
+        // Try auto-connect if on target network
+        if isOnTargetNetwork && !isConnected && state != .connecting {
+            Logger.shared.info("Target network detected, attempting connection...")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                self.connect()
+            }
+        }
+    }
+    
+    // Debug function to test basic connectivity
+    func testBasicConnectivity() {
+        Logger.shared.info("🔍 Testing basic connectivity to \(host):\(port)")
+        
+        let testParameters = NWParameters.tcp
+        testParameters.allowLocalEndpointReuse = true
+        let testConnection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: testParameters)
+        
+        testConnection.stateUpdateHandler = { state in
+            DispatchQueue.main.async {
+                switch state {
+                case .ready:
+                    Logger.shared.info("✅ Basic connectivity test PASSED - ESP32-CAM is reachable")
+                    testConnection.cancel()
+                case .failed(let error):
+                    Logger.shared.error("❌ Basic connectivity test FAILED: \(error.localizedDescription)")
+                    Logger.shared.error("💡 Possible issues:")
+                    Logger.shared.error("   - Not connected to ESP32-CAM WiFi network")
+                    Logger.shared.error("   - ESP32-CAM not running or crashed")
+                    Logger.shared.error("   - TCP server not started on ESP32-CAM")
+                    Logger.shared.error("   - Firewall blocking connection")
+                    testConnection.cancel()
+                case .cancelled:
+                    break
+                default:
+                    Logger.shared.info("🔄 Test connection state: \(state)")
+                }
+            }
+        }
+        
+        testConnection.start(queue: DispatchQueue.global())
+        
+        // Cancel after 5 seconds
+        DispatchQueue.global().asyncAfter(deadline: .now() + 5.0) {
+            testConnection.cancel()
         }
     }
     
@@ -124,7 +177,8 @@ class ConnectionManager: ObservableObject {
             self.errorMessage = nil
         }
         
-        Logger.shared.info("Attempting connection to \(host):\(port) (attempt \(connectionAttempts))")
+        Logger.shared.info("🚀 Attempting connection to \(host):\(port) (attempt \(connectionAttempts))")
+        Logger.shared.info("📡 Target should be ESP32-CAM TCP server on port 3333")
         
         let parameters = NWParameters.tcp
         parameters.allowLocalEndpointReuse = true
@@ -133,6 +187,8 @@ class ConnectionManager: ObservableObject {
         
         let connection = NWConnection(host: NWEndpoint.Host(host), port: NWEndpoint.Port(rawValue: port)!, using: parameters)
         self.connection = connection
+        
+        Logger.shared.info("💡 Connection object created, starting connection...")
         
         // Set connection timeout
         DispatchQueue.global().asyncAfter(deadline: .now() + AppConfig.Network.connectionTimeout) { [weak self] in
@@ -152,30 +208,35 @@ class ConnectionManager: ObservableObject {
         connection.stateUpdateHandler = { [weak self] newState in
             guard let self = self else { return }
             
+            Logger.shared.info("Connection state changed to: \(newState)")
+            
             switch newState {
             case .ready:
-                Logger.shared.info("Connection established successfully")
+                Logger.shared.info("✅ TCP connection established successfully to \(self.host):\(self.port)")
                 self.connectionQueue.async {
                     self.handleSuccessfulConnection()
                 }
             case .preparing:
-                Logger.shared.debug("Connection preparing...")
+                Logger.shared.info("🔄 Connection preparing...")
             case .setup:
-                Logger.shared.debug("Connection setup...")
+                Logger.shared.info("🔧 Connection setup...")
             case .waiting(let error):
-                Logger.shared.warning("Connection waiting: \(error.localizedDescription)")
+                Logger.shared.warning("⏳ Connection waiting: \(error.localizedDescription)")
+                Logger.shared.warning("This usually means the ESP32-CAM TCP server is not responding")
                 self.handleConnectionFailure(error: error)
             case .failed(let error):
-                Logger.shared.error("Connection failed: \(error.localizedDescription)")
+                Logger.shared.error("❌ Connection failed: \(error.localizedDescription)")
+                Logger.shared.error("Check if ESP32-CAM is running and accessible at \(self.host):\(self.port)")
                 self.handleConnectionFailure(error: error)
             case .cancelled:
-                Logger.shared.info("Connection cancelled")
+                Logger.shared.info("🚫 Connection cancelled")
                 DispatchQueue.main.async {
                     self.isConnected = false
                     self.state = .disconnected
                     self.errorMessage = "Connection cancelled"
                 }
             default:
+                Logger.shared.warning("Unknown connection state: \(newState)")
                 break
             }
         }
@@ -311,7 +372,7 @@ class ConnectionManager: ObservableObject {
                         }
                     }
                 } else {
-                    Logger.shared.debug("Message sent successfully: \(message.trimmingCharacters(in: .whitespacesAndNewlines))")
+                    Logger.shared.info("✅ Message sent successfully: '\(message.trimmingCharacters(in: .whitespacesAndNewlines))'")
                     DispatchQueue.main.async {
                         self?.lastCommand = message.trimmingCharacters(in: .whitespacesAndNewlines)
                         self?.errorMessage = nil // Clear error on successful send
@@ -457,7 +518,7 @@ class ConnectionManager: ObservableObject {
             }
         }
         
-        Logger.shared.debug("Received message: \(trimmedMessage)")
+        Logger.shared.info("📥 Received message: '\(trimmedMessage)'")
     }
     
     private func handleUARTMessage(_ message: String) {
@@ -521,6 +582,7 @@ class ConnectionManager: ObservableObject {
     }
     
     private func fetchStatus() {
+        Logger.shared.info("📤 Sending STATUS command to test connection")
         sendCommand("STATUS")
     }
     
@@ -618,16 +680,18 @@ class ConnectionManager: ObservableObject {
         Logger.shared.info("Network path updated: \(path.status)")
         
         if path.status == .satisfied && path.usesInterfaceType(.wifi) {
+            Logger.shared.info("WiFi network is available")
             updateCurrentWiFiSSID()
             
             // Auto-connect if on target network and not already connected
             if isOnTargetNetwork && !isConnected && state != .connecting {
                 Logger.shared.info("On target WiFi network, auto-connecting...")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                     self?.connect()
                 }
             }
         } else {
+            Logger.shared.warning("WiFi network not available: \(path.status)")
             currentWiFiSSID = "No WiFi"
             isOnTargetNetwork = false
             
@@ -639,42 +703,19 @@ class ConnectionManager: ObservableObject {
     }
     
     private func updateCurrentWiFiSSID() {
-        // Note: This requires iOS 14+ and proper entitlements
-        // For now, we'll use a simplified approach
-        let targetSSIDs = ["ESP32-CAM", "UnLateBoard", "ESP32-CAM-AP"]
-        
-        // In a real implementation, you'd get the actual SSID
-        // For now, we'll assume if we can connect to the default host, we're on the right network
-        DispatchQueue.global().async { [weak self] in
+        // Simplified approach: check if we're on a WiFi network that can reach our target
+        DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            // Simple network check by attempting to reach the host
-            let testConnection = NWConnection(host: NWEndpoint.Host(self.host), 
-                                            port: NWEndpoint.Port(rawValue: self.port)!, 
-                                            using: .tcp)
-            
-            testConnection.stateUpdateHandler = { state in
-                DispatchQueue.main.async {
-                    switch state {
-                    case .ready:
-                        self.currentWiFiSSID = "ESP32-CAM" // Assume we're on the right network
-                        self.isOnTargetNetwork = true
-                        testConnection.cancel()
-                    case .failed, .cancelled:
-                        self.currentWiFiSSID = "Unknown WiFi"
-                        self.isOnTargetNetwork = false
-                        testConnection.cancel()
-                    default:
-                        break
-                    }
-                }
-            }
-            
-            testConnection.start(queue: DispatchQueue.global())
-            
-            // Cancel test connection after 2 seconds
-            DispatchQueue.global().asyncAfter(deadline: .now() + 2.0) {
-                testConnection.cancel()
+            // For now, assume if we have WiFi and are trying to connect to the default ESP32 IP,
+            // we're likely on the ESP32-CAM network
+            if self.host == AppConfig.Network.defaultHost {
+                self.currentWiFiSSID = "ESP32-CAM Network"
+                self.isOnTargetNetwork = true
+                Logger.shared.info("Detected likely ESP32-CAM network connection")
+            } else {
+                self.currentWiFiSSID = "Other WiFi"
+                self.isOnTargetNetwork = false
             }
         }
     }
