@@ -83,7 +83,7 @@ struct ManualView: View {
                                     value: $speedValue,
                                 )
                                 .onChange(of: speedValue) {
-                                    ConnectionManager.shared.sendRawMessage(message: "SPEED \(Int(speedValue))\n")
+                                    ConnectionManager.sendRawMessage(message: "SPEED \(Int(speedValue))\n")
                                 }
                                 
                                 VStack {
